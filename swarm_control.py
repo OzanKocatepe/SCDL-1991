@@ -60,15 +60,15 @@ def test_trial(scf):
     time.sleep(flight_time)
 
 def start_logging(scf):
-    log_conf1 = LogConfig(name='Position', period_in_ms=100)
-    log_conf1.add_variable('stateEstimate.x', 'float')
-    log_conf1.add_variable('stateEstimate.y', 'float')
-    log_conf1.add_variable('stateEstimate.z', 'float')
-    log_conf1.add_variable('pm.vbat', 'float')
-    log_conf1.add_variable('pm.state', 'float')
-    scf.cf.log.add_config(log_conf1)
-    log_conf1.data_received_cb.add_callback(lambda _timestamp, data, _logconf: log_callback(scf.cf.link_uri, data))
-    log_conf1.start()
+    log_conf = LogConfig(name='Position', period_in_ms=100)
+    log_conf.add_variable('stateEstimate.x', 'float')
+    log_conf.add_variable('stateEstimate.y', 'float')
+    log_conf.add_variable('stateEstimate.z', 'float')
+    log_conf.add_variable('pm.vbat', 'float')
+    log_conf.add_variable('pm.state', 'float')
+    scf.cf.log.add_config(log_conf)
+    log_conf.data_received_cb.add_callback(lambda _timestamp, data, _logconf: log_callback(scf.cf.link_uri, data))
+    log_conf.start()
 
 def log_callback(uri, data):
     pos = []
