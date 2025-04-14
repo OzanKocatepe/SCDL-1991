@@ -1,8 +1,10 @@
 import time
+import logging
 
 import cflib.crtp
 from cflib.crazyflie.swarm import CachedCfFactory
 from cflib.crazyflie.swarm import Swarm
+from cflib.crazyflie.log import LogConfig
 
 # commander.go_to(x, y, z, yaw, duration_s, relative)
 # if Crazyflie is facing right, then relative coordinates
@@ -58,21 +60,22 @@ def test_trial(scf):
     time.sleep(flight_time)
 
 def start_logging(scf):
-    log_conf1 = LogConfig(name='Position', period_in_ms=500)
+    log_conf1 = LogConfig(name='Position', period_in_ms=100)
     log_conf1.add_variable('stateEstimate.x', 'float')
     log_conf1.add_variable('stateEstimate.y', 'float')
     log_conf1.add_variable('stateEstimate.z', 'float')
+    log_conf1.add_variable('pm.vbat', 'float')
+    log_conf1.add_variable('pm.state', 'float')
     scf.cf.log.add_config(log_conf1)
-    log_conf1.data_received_cb.add_callback(lambda _timestamp, data, _logconf: position_callback(scf.cf.link_uri, data))
+    log_conf1.data_received_cb.add_callback(lambda _timestamp, data, _logconf: log_callback(scf.cf.link_uri, data))
     log_conf1.start()
 
-def position_callback(uri, data):
-    if uri == URI1:
-        pos1[0] = data['stateEstimate.x']
-        pos1[1] = data['stateEstimate.y']
-        pos1[2] = data['stateEstimate.z']
-        battery = data[]
-        print(f'Uri: {uri}, Position: x={pos1[0]}, y={pos1[1]}, z={pos1[2]}, battery={}')
+def log_callback(uri, data):
+    pos = []
+    pos[0] = data['stateEstimate.x']
+    pos[1] = data['stateEstimate.y']
+    pos[2] = data['stateEstimate.z']
+    print(f'URI={uri}, Position: x={pos[0]}, y={pos[1]}, z={pos[2]}, Battery={data["pm.vbat"]} V ({data["pm.state"]}%)')
 
 # The URIs of the drones that are going to be flying.
 uris = {
@@ -104,9 +107,8 @@ if __name__ == "__main__":
         print("Estimators reset.")
 
         # Logs.
-        swarm.parallel_safe(simple_log_async)
+        swarm.parallel_safe(start_logging)
 
         swarm.parallel_safe(take_off)
         swarm.parallel_safe(test_trial)
         swarm.parallel_safe(land)
-
