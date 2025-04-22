@@ -67,6 +67,7 @@ def StartLogging(scf, log_file):
 
     # Adds the configs to the crazyflie.
     scf.cf.log.add_config(posBatConfig)
+    scf.cf.log.add_config(velConfig)
 
     # Adds the callback functions and starts logging.
     posBatConfig.data_received_cb.add_callback(lambda timestamp, data, _logconf: PosAndBatCallback(scf.cf.link_uri, timestamp, data, log_file))
