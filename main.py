@@ -31,8 +31,9 @@ if __name__ == "__main__":
         # Executes light_check in parallel for all
         # drones in the swarm.
         print("Starting light check...")
-        swarm.parallel_safe(light_check)
+        swarm.parallel_safe(LightCheck)
         print("Light check completed.")
+
         # Resets the internal position estimator and waits
         # for its variance to drop below a certain threshold
         # in order to make sure the position estimations are accurate.
@@ -41,12 +42,13 @@ if __name__ == "__main__":
         print("Estimators reset.")
         
         file_args = {
-            uris[0]: (LOG_FOLDER + "/" + datetime.datetime.now() + "csv",),
+            uris[0]: (LOG_FOLDER + "/" + datetime.datetime.now() + ".csv",),
             # uris[1]: (LOG_FOLDER + "/" + "test.csv",)
         }
 
         # Sets up the logging config so that it outputs to the proper file.
-        swarm.parallel_safe(start_logging, args_dict=file_args)
+        swarm.parallel_safe(StartLogging, args_dict=file_args)
+        print("Logging started.")
         # time.sleep(2)
 
         args = {
@@ -54,6 +56,6 @@ if __name__ == "__main__":
             # uris[1]: ((-1, 1), (1, 2))
         }
 
-        swarm.parallel_safe(take_off)
-        swarm.parallel_safe(run_through_trials, args_dict=args)
-        swarm.parallel_safe(land)
+        swarm.parallel_safe(TakeOff)
+        swarm.parallel_safe(RunThroughTrials, args_dict=args)
+        swarm.parallel_safe(Land)
