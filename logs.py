@@ -6,6 +6,19 @@ from cflib.crazyflie.swarm import CachedCfFactory
 from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
+"""Stores all the functions for logging.
+
+Contains the functions for logging, data collection,
+and any other methods related to communicating with the drones.
+
+Methods:
+    LightCheck:
+        Turns the LEDs red for 2 seconds.
+    StartLogging:
+        Tells the Crazyflie to begin logging the required variables.
+    LogCallback:
+        Saves each packet of data to the desired file."""
+
 def LightCheck(scf):
     """Turns the LEDS red for 2 seconds.
     """

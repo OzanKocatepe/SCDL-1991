@@ -10,6 +10,20 @@ from cflib.crazyflie.log import LogConfig
 DEFAULT_HEIGHT = 1.0
 DEFAULT_TIME = 2.0
 
+"""Stores the functions related to movement of the drone.
+
+Methods:
+    TakeOff:
+        Makes the drone take off in place.
+    Land:
+        Makes the drone land directly below its current position.
+    GoToRelativePositionWithVelocity:
+        Goes to a position relative to the drone's current position
+        with a desired velocity.
+    RunThroughTrials:
+        Performs a simple trial repeatedly with different speeds.
+"""
+
 def TakeOff(scf):
     """Makes the drone take off.
 
@@ -37,13 +51,6 @@ def Land(scf):
     time.sleep(DEFAULT_TIME)
 
     commander.stop()
-
-def HoverSequence(scf):
-    """Takes off and then immediately lands.
-    """
-
-    TakeOff(scf)
-    Land(scf)
 
 def GoToRelativePositionWithVelocity(scf, parameters):
     """Goes to a new position at a desired velocity.
