@@ -20,8 +20,9 @@ Methods:
     GoToRelativePositionWithVelocity:
         Goes to a position relative to the drone's current position
         with a desired velocity.
-    RunThroughTrials:
-        Performs a simple trial repeatedly with different speeds.
+    FlyRouteWithDifferingSpeeds:
+        Flies a straight-line route with a constant altitude
+        repeatedly with different speeds.
 """
 
 def TakeOff(scf):
@@ -52,25 +53,29 @@ def Land(scf):
 
     commander.stop()
 
-def GoToRelativePositionWithVelocity(scf, parameters):
+def GoToRelativePositionWithVelocity(scf, position: tuple[float], yaw: float, velocity: float):
     """Goes to a new position at a desired velocity.
 
+    Note: There is a 1.0 second delay after movement, so
+    there will be a delay between repeated calls of this function
+    in order to allow the crazyflie time to stabilise.
+
     Parameters:
-        parameters: list[float]
-            A list of parameters given in the form
-            [x, y, z, yaw, velocity] where the (x, y, z) position and yaw
-            are relative to the drones current position. The velocity is
-            m/s.
+        position: tuple[float]:
+            The relative (x, y, z) coordinates to go to.
+        yaw: float
+            The amount of radians counterclockwise to rotate
+            during the flight.
+        velocity: float
+            The desired velocity in m/s.
     """
 
     commander = scf.cf.high_level_commander
 
-    # Extracts the parameters.
-    x = parameters[0]
-    y = parameters[1]
-    z = parameters[2]
-    yaw = parameters[3]
-    velocity = parameters[4]
+    # Extracts the position.
+    x = position[0]
+    y = position[1]
+    z = position[2]
     
     # Calculates the distance to the point.
     distance = math.sqrt(x * x + y * y + z * z)
@@ -80,24 +85,28 @@ def GoToRelativePositionWithVelocity(scf, parameters):
     commander.go_to(x, y, z, yaw, flight_time, relative=True)
     time.sleep(flight_time + 1.0)
 
-def RunThroughTrials(scf, relative_pos, speeds):
-    """Performs a trial with various speeds.
+def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[float]):
+    """Moves the drone back and forth with varying speed.
 
-    Makes the Crazyflie fly the same path repeatedly with different speeds.
+    Moves the drone back and forth between two different points at the same altitude
+    repeatedly with various speeds. The end point is given, and the beginning point is
+    the initial position of the Crazyflie when this function is called.
 
     Parameters:
-        relative_pos: tuple[int]
-            The position to fly the Crazyflie to (end point of each trial)
+        relative_pos: tuple[float]
+            The (x, y) position to fly the Crazyflie to (end point of each trial)
             relative to the initial position of the Crazyflie.
-        speeds: tuple[int]
+        speeds: tuple[float]
             The different speeds, in m/s, for the Crazyflie to iterate through.
     """
+
     # Loops through each speed.
     for speed in speeds:
-        # Goes to the relative position with the desired parameters.
-        parameters = [relative_pos[0], relative_pos[1], 0, math.atan(relative_pos[1] / relative_pos[0]), speed]
-        GoToRelativePositionWithVelocity(scf, parameters)
+        # Gets the desired position and orientation.
+        position = (relative_pos[0], relative_pos[1], 0)
+        orientation = math.atan(relative_pos[1] / relative_pos[0])
 
-        # Goes back to the initial position with the same positions.
-        parameters = [-relative_pos[0], -relative_pos[1], 0, math.atan(relative_pos[1] / relative_pos[0]) + math.pi, speed]
-        GoToRelativePositionWithVelocity(scf, parameters)
+        # Goes to the position.
+        GoToRelativePositionWithVelocity(scf, newPosition, math.atan(relative_pos[1] / relative_pos[0]), speed)
+        # Returns back to the initial position.
+        GoToRelativePositionWithVelocity(scf, -position, orientation + math.pi, speed)

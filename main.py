@@ -13,8 +13,8 @@ from flight import *
 
 # The URIs of the drones that are going to be flying.
 uris = [
-    'radio://0/80/2M/E7E7E7E7E4',
-    # 'radio://0/80/2M/E7E7E7E7E7'
+    # 'radio://0/80/2M/E7E7E7E7E4',
+    'radio://0/80/2M/E7E7E7E7E7'
 ]
 
 # Only output errors.
@@ -41,21 +41,26 @@ if __name__ == "__main__":
         swarm.reset_estimators()
         print("Estimators reset.")
         
-        file_args = {
-            uris[0]: (LOG_FOLDER + "/" + datetime.datetime.now() + ".csv",),
-            # uris[1]: (LOG_FOLDER + "/" + "test.csv",)
+        startLoggingArgs = {
+            # URI: (log_file,),
+            uris[0]: (LOG_FOLDER + "/" + str(datetime.datetime.now()) + ".csv",),
         }
 
         # Sets up the logging config so that it outputs to the proper file.
-        swarm.parallel_safe(StartLogging, args_dict=file_args)
+        swarm.parallel_safe(StartLogging, args_dict=startLoggingArgs)
         print("Logging started.")
-        # time.sleep(2)
+        time.sleep(2)
+        exit()
 
-        args = {
+        # Dictionary contatining args.
+        # Each URI entry corresponds to a tuple.
+        # The elements of the tuple then correspond to each parameter of the
+        # function being called.
+        flightArgs = {
+            # URI: (relative_pos, speeds),
             uris[0]: ((-1, 1), (1, 2)),
-            # uris[1]: ((-1, 1), (1, 2))
         }
 
-        swarm.parallel_safe(TakeOff)
-        swarm.parallel_safe(RunThroughTrials, args_dict=args)
-        swarm.parallel_safe(Land)
+        # swarm.parallel_safe(TakeOff)
+        # swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        # swarm.parallel_safe(Land)

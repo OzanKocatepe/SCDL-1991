@@ -16,8 +16,13 @@ Methods:
         Turns the LEDs red for 2 seconds.
     StartLogging:
         Tells the Crazyflie to begin logging the required variables.
-    LogCallback:
-        Saves each packet of data to the desired file."""
+    PosAndBatCallback:
+        Saves each packet of position and battery
+        data to the desired file.
+    VelCallback:
+        Saves each packet of velocity data
+        to the desired file.
+"""
 
 def LightCheck(scf):
     """Turns the LEDS red for 2 seconds.
@@ -38,63 +43,86 @@ def StartLogging(scf, log_file):
             The file that the logged data will be saved to.
     """
 
-    log_config = LogConfig(name='Position & Battery', period_in_ms=100)
+    # Creates the log file.    
+    file = open(log_file, "w")
+    file.write("timestamp,URI,(x,y,z, batV) or (vx, vy, vz)\n")
+    file.close()
+    
+    # Defines our log configs.
+    posBatConfig = LogConfig(name='Position & Battery', period_in_ms=100)
+    velConfig = LogConfig(name="Velocity", period_in_ms=100)
 
     # Adds the position variables.
-    log_config.add_variable('stateEstimate.x', 'float')
-    log_config.add_variable('stateEstimate.y', 'float')
-    log_config.add_variable('stateEstimate.z', 'float')
+    posBatConfig.add_variable('stateEstimate.x', 'float')
+    posBatConfig.add_variable('stateEstimate.y', 'float')
+    posBatConfig.add_variable('stateEstimate.z', 'float')
 
     # Adds the velocity variables.
-    log_config.add_variable('stateEstimate.vx', 'float')
-    log_config.add_variable('stateEstimate.vy', 'float')
-    log_config.add_variable('stateEstimate.vz', 'float')
+    velConfig.add_variable('stateEstimate.vx', 'float')
+    velConfig.add_variable('stateEstimate.vy', 'float')
+    velConfig.add_variable('stateEstimate.vz', 'float')
 
-    # Adds the battery variables (pm.vbat is battery voltage, pm.state is battery %).
-    log_config.add_variable('pm.vbat', 'float')
-    # log_config.add_variable('pm.batteryLevel', 'float')
-    
-    scf.cf.log.add_config(log_config)
+    # Adds the battery as a voltage.
+    posBatConfig.add_variable('pm.vbat', 'float')
 
-    # Adds the callback function and starts logging.
-    log_config.data_received_cb.add_callback(lambda _timestamp, data, _logconf: LogCallback(scf.cf.link_uri, data, log_file))
-    log_config.start()
+    # Adds the configs to the crazyflie.
+    scf.cf.log.add_config(posBatConfig)
 
-def LogCallback(uri, data, log_file):
-    """Saves the data from the Crazyflie to a file. 
+    # Adds the callback functions and starts logging.
+    posBatConfig.data_received_cb.add_callback(lambda timestamp, data, _logconf: PosAndBatCallback(scf.cf.link_uri, timestamp, data, log_file))
+    posBatConfig.start()
 
-    This function is called every time a packet is received from the Crazyflie.
-    It saves the data into a .csv file.
+    velConfig.data_received_cb.add_callback(lambda timestamp, data, _logconf: VelCallback(scf.cf.link_uri, timestamp, data, log_file))
+    velConfig.start()
+
+def PosAndBatCallback(uri, timestamp, data, log_file):
+    """Saves the position and battery data from the Crazyflie to a file. 
+
+    This function is called every time a packet containing position and battery
+    data is received from the Crazyflie. It saves the data into a .csv file.
 
     Parameters:
         log_file: str
             The file that the logged data will be saved to.
     """
 
-    # Gets the positions variables.
+    # Gets the position variables.
     # If a position retrieval fails and for some reason it doesn't throw an error, then
     # the position will be None.
     pos = [None, None, None]
     pos[0] = data['stateEstimate.x']
     pos[1] = data['stateEstimate.y']
     pos[2] = data['stateEstimate.z']
-
-    velocity = [None, None, None]
-    velocity[0] = data['stateEstimate.vx']
-    velocity[1] = data['stateEstimate.vy']
-    velocity[2] = data['stateEstimate.vz']
     
-    # If the file doesn't exist, we will create it
-    # and then create the header row.
-    try:
-        file = open(log_file, "x")
-        file.close()
-        file = open(log_file, "w")
-        file.write("URI,x,y,z,vx,vy,vz,batV\n")
-    # If the file already exists, we will simply append to it.
-    except:
-        file = open(log_file, "a")
+    # Opens the file in append mode.
+    file = open(log_file, "a")
 
     # Writes to the file in csv form and then closes it.
-    file.write(f'{uri},{pos[0]},{pos[1]},{pos[2]},{velocity[0]},{velocity[1]},{velocity[2]},{data["pm.vbat"]}\n')
+    file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{data["pm.vbat"]}\n')
+    file.close()
+
+def VelCallback(uri, timestamp, data, log_file):
+    """Saves the velocity data from the Crazyflie to a file. 
+
+    This function is called every time a packet containing velocity
+    data is received from the Crazyflie. It saves the data into a .csv file.
+
+    Parameters:
+        log_file: str
+            The file that the logged data will be saved to.
+    """
+
+    # Gets the velocity variables.
+    # If a velocity retrieval fails and for some reason it doesn't throw an error, then
+    # the velocity will be None.
+    vel = [None, None, None]
+    vel[0] = data['stateEstimate.vx']
+    vel[1] = data['stateEstimate.vy']
+    vel[2] = data['stateEstimate.vz']
+    
+    # Opens the file in append mode.
+    file = open(log_file, "a")
+
+    # Writes to the file in csv form and then closes it.
+    file.write(f'{timestamp},{uri},{vel[0]},{vel[1]},{vel[2]}\n')
     file.close()
