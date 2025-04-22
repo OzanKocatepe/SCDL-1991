@@ -43,10 +43,17 @@ def StartLogging(scf, log_file):
             The file that the logged data will be saved to.
     """
 
-    # Creates the log file.    
-    file = open(log_file, "w")
-    file.write("timestamp,URI,(x,y,z, batV) or (vx, vy, vz)\n")
+    # Creates the log file.
+    log_file = log_file.split(".csv")
+    file = open(log_file[0] + "_pos.csv", "w")
+    file.write("timestamp,URI,x,y,z,batV\n")
     file.close()
+
+    file = open(log_file[0] + "_vel.csv", "w")
+    file.write("timestamp,URI,vx,vy,vz\n")
+    file.close()
+
+    log_file = log_file[0] + ".csv"
     
     # Defines our log configs.
     posBatConfig = LogConfig(name='Position & Battery', period_in_ms=100)
@@ -94,6 +101,9 @@ def PosAndBatCallback(uri, timestamp, data, log_file):
     pos[0] = data['stateEstimate.x']
     pos[1] = data['stateEstimate.y']
     pos[2] = data['stateEstimate.z']
+
+    log_file = log_file.split(".csv")
+    log_file = log_file[0] + "_pos.csv"
     
     # Opens the file in append mode.
     file = open(log_file, "a")
@@ -120,6 +130,9 @@ def VelCallback(uri, timestamp, data, log_file):
     vel[0] = data['stateEstimate.vx']
     vel[1] = data['stateEstimate.vy']
     vel[2] = data['stateEstimate.vz']
+
+    log_file = log_file.split(".csv")
+    log_file = log_file[0] + "_vel.csv"
     
     # Opens the file in append mode.
     file = open(log_file, "a")
