@@ -13,8 +13,8 @@ from flight import *
 
 # The URIs of the drones that are going to be flying.
 uris = [
-    # 'radio://0/80/2M/E7E7E7E7E4',
-    'radio://0/80/2M/E7E7E7E7E7'
+    'radio://0/80/2M/E7E7E7E7E4',
+    # 'radio://0/80/2M/E7E7E7E7E7'
 ]
 
 # Only output errors.
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     factory = CachedCfFactory(rw_cache="./cache")
 
     with Swarm(uris, factory=factory) as swarm:
-        # Executes light_check in parallel for all
+        # Executes LightCheck in parallel for all
         # drones in the swarm.
         print("Starting light check...")
         swarm.parallel_safe(LightCheck)
@@ -41,6 +41,10 @@ if __name__ == "__main__":
         swarm.reset_estimators()
         print("Estimators reset.")
         
+        # Dictionary contatining args.
+        # Each URI entry corresponds to a tuple.
+        # The elements of the tuple then correspond to each parameter of the
+        # function being called.
         startLoggingArgs = {
             # URI: (log_file,),
             uris[0]: (LOG_FOLDER + "/" + str(datetime.datetime.now()) + ".csv",),
@@ -49,18 +53,14 @@ if __name__ == "__main__":
         # Sets up the logging config so that it outputs to the proper file.
         swarm.parallel_safe(StartLogging, args_dict=startLoggingArgs)
         print("Logging started.")
-        time.sleep(2)
-        exit()
+        # time.sleep(2)
+        # exit()
 
-        # Dictionary contatining args.
-        # Each URI entry corresponds to a tuple.
-        # The elements of the tuple then correspond to each parameter of the
-        # function being called.
         flightArgs = {
             # URI: (relative_pos, speeds),
             uris[0]: ((-1, 1), (1, 2)),
         }
 
-        # swarm.parallel_safe(TakeOff)
-        # swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
-        # swarm.parallel_safe(Land)
+        swarm.parallel_safe(TakeOff)
+        swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        swarm.parallel_safe(Land)

@@ -35,7 +35,7 @@ def TakeOff(scf):
 
     # Tells commander to command take off.
     commander.takeoff(DEFAULT_HEIGHT, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME)
+    time.sleep(DEFAULT_TIME + 1)
 
 def Land(scf):
     """Makes the drone land.
@@ -49,7 +49,7 @@ def Land(scf):
 
     # Tells commander to command landing.
     commander.land(0.0, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME)
+    time.sleep(DEFAULT_TIME + 1)
 
     commander.stop()
 
@@ -107,6 +107,8 @@ def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[f
         orientation = math.atan(relative_pos[1] / relative_pos[0])
 
         # Goes to the position.
-        GoToRelativePositionWithVelocity(scf, newPosition, math.atan(relative_pos[1] / relative_pos[0]), speed)
+        GoToRelativePositionWithVelocity(scf, position, orientation, speed)
+        
         # Returns back to the initial position.
-        GoToRelativePositionWithVelocity(scf, -position, orientation + math.pi, speed)
+        position = (-relative_pos[0], -relative_pos[1], 0)
+        GoToRelativePositionWithVelocity(scf, position, orientation + math.pi, speed)
