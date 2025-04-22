@@ -7,12 +7,15 @@ from cflib.crazyflie.swarm import CachedCfFactory
 from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
-DEFAULT_HEIGHT = 1.0
-DEFAULT_TIME = 2.0
+DEFAULT_HEIGHT = 2.0 # Default height to fly at.
+DEFAULT_TIME = 2.0 # Default take-off or landing duration.
+DEFAULT_DELAY = 2.0 # Default extra time to wait after giving the Crazyflie a command.
 
 """Stores the functions related to movement of the drone.
 
 Methods:
+    WaitForEstimators:
+        Returns once the kalman estimators have been stabilized.
     TakeOff:
         Makes the drone take off in place.
     Land:
@@ -25,6 +28,50 @@ Methods:
         repeatedly with different speeds.
 """
 
+def ConfigureEstimator(scf):
+    """Tells the drone to use the kalman estimator and the best lighthouse quality.
+    """
+
+    # Sets the kalman stabilizer.
+    scf.cf.param.set_value('stabilizer.estimator', '2')
+    time.sleep(0.1)
+    scf.cf.param.set_value('lighthouse.method', '0')  # 0 = best quality
+    time.sleep(0.1)
+
+def WaitForEstimators(scf):
+    """Waits for the estimators to converge before flying.
+    """
+    
+    # Creates a 10 item list, with each item set to 100.
+    # We will be using it as a queue.
+    history = [1000] * 10
+
+    config = LogConfig(name="Kalman", period_in_ms=100)
+    config.add_variable("kalman.varPX", 'float')
+    config.add_variable("kalman.varPY", 'float')
+
+    # Continuously loops. We accept potentially an infinite loop because
+    # it will only occur before the Crazyflies start flying, so it can't
+    # cause any mid-air issues (which are our main safety concern).
+    while True:
+        # Gets the value of the kalman stabilizer.
+        var_x = float(scf.cf.param.get_value('kalman.varPX'))
+        var_y = float(scf.cf.param.get_value('kalman.varPY'))
+
+        # Using history as a queue, appends the sum of the stabilizer
+        # values to the end and pops the beginning of the list.
+        history.append(var_x + var_y)
+        history.pop(0)
+
+        # Checks if the difference between the maximum and minimum of
+        # the last 10 stabilizer values is less than 0.001.
+        # If so, the stabilizer values must clearly have converged.
+        if max(history) - min(history) < 0.001:
+            break
+        
+        # Sleeps for 0.1 seconds so as to not overload the Crazyflie.
+        time.sleep(0.1)
+
 def TakeOff(scf):
     """Makes the drone take off.
 
@@ -35,7 +82,12 @@ def TakeOff(scf):
 
     # Tells commander to command take off.
     commander.takeoff(DEFAULT_HEIGHT, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME + 1)
+    time.sleep(DEFAULT_TIME + DEFAULT_DELAY)
+    
+    # Hovers in the same position after take off.
+    # For some reason, the drone likes it when you do this.
+    commander.go_to(0.0, 0.0, DEFAULT_HEIGHT, 0.0, 1.0)
+    time.sleep(1.0)
 
 def Land(scf):
     """Makes the drone land.
@@ -49,7 +101,7 @@ def Land(scf):
 
     # Tells commander to command landing.
     commander.land(0.0, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME + 1)
+    time.sleep(DEFAULT_TIME + DEFAULT_DELAY)
 
     commander.stop()
 
@@ -83,7 +135,7 @@ def GoToRelativePositionWithVelocity(scf, position: tuple[float], yaw: float, ve
     flight_time = distance / velocity
 
     commander.go_to(x, y, z, yaw, flight_time, relative=True)
-    time.sleep(flight_time + 1.0)
+    time.sleep(flight_time + DEFAULT_DELAY)
 
 def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[float]):
     """Moves the drone back and forth with varying speed.

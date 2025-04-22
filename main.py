@@ -14,8 +14,8 @@ from flight import *
 # The URIs of the drones that are going to be flying.
 uris = [
     # 'radio://0/80/2M/E7E7E7E7E4',
-    # 'radio://0/80/2M/E7E7E7E7E6'
-    'radio://0/80/2M/E7E7E7E7E7'
+    'radio://0/80/2M/E7E7E7E7E6'
+    # 'radio://0/80/2M/E7E7E7E7E7'
 ]
 
 # Only output errors.
@@ -40,7 +40,16 @@ if __name__ == "__main__":
         # in order to make sure the position estimations are accurate.
         print("Resetting estimators...")
         swarm.reset_estimators()
-        print("Estimators reset.")
+        
+        # Configures the estimators (see function for more detail)
+        print("Configuring estimators...")
+        swarm.parallel_safe(ConfigureEstimator)
+        
+        # Waits for kalman values to stabilize.
+        print("Waiting for estimators to converge...")
+        # swarm.parallel_safe(WaitForEstimators)
+
+        print("Estimators converged.")
         
         # Dictionary contatining args.
         # Each URI entry corresponds to a tuple.
@@ -63,5 +72,6 @@ if __name__ == "__main__":
         }
 
         swarm.parallel_safe(TakeOff)
-        swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        # swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        time.sleep(3.0)
         swarm.parallel_safe(Land)
