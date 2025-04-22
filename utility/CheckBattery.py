@@ -12,9 +12,9 @@ from cflib.crazyflie.log import LogConfig
 
 # The URIs of the drones that are going to be flying.
 uris = [
-    'radio://0/80/2M/E7E7E7E7E4',
+    # 'radio://0/80/2M/E7E7E7E7E4',
     'radio://0/80/2M/E7E7E7E7E6',
-    'radio://0/80/2M/E7E7E7E7E7'
+    # 'radio://0/80/2M/E7E7E7E7E7'
 ]
 
 # Only output errors.

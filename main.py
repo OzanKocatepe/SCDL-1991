@@ -33,23 +33,23 @@ if __name__ == "__main__":
         # drones in the swarm.
         print("Starting light check...")
         swarm.parallel_safe(LightCheck)
-        print("Light check completed.")
+        print("Light check completed.\n")
 
         # Resets the internal position estimator and waits
         # for its variance to drop below a certain threshold
         # in order to make sure the position estimations are accurate.
         print("Resetting estimators...")
-        # swarm.reset_estimators()
+        swarm.reset_estimators()
         
         # Configures the estimators (see function for more detail)
         print("Configuring estimators...")
         swarm.parallel_safe(ConfigureEstimator)
         
         # Waits for kalman values to stabilize.
-        print("Waiting for estimators to converge...")
+        # print("Waiting for estimators to converge...")
         # swarm.parallel_safe(WaitForEstimators)
 
-        print("Estimators converged.")
+        print("Estimators converged.\n")
         
         # Dictionary contatining args.
         # Each URI entry corresponds to a tuple.
@@ -63,8 +63,8 @@ if __name__ == "__main__":
         # Sets up the logging config so that it outputs to the proper file.
         swarm.parallel_safe(StartLogging, args_dict=startLoggingArgs)
         print("Logging started.")
-        time.sleep(2)
-        exit()
+        # time.sleep(2)
+        # exit()
 
         flightArgs = {
             # URI: (relative_pos, speeds),
