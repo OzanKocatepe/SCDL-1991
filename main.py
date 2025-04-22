@@ -39,7 +39,7 @@ if __name__ == "__main__":
         # for its variance to drop below a certain threshold
         # in order to make sure the position estimations are accurate.
         print("Resetting estimators...")
-        swarm.reset_estimators()
+        # swarm.reset_estimators()
         
         # Configures the estimators (see function for more detail)
         print("Configuring estimators...")
@@ -63,8 +63,8 @@ if __name__ == "__main__":
         # Sets up the logging config so that it outputs to the proper file.
         swarm.parallel_safe(StartLogging, args_dict=startLoggingArgs)
         print("Logging started.")
-        # time.sleep(2)
-        # exit()
+        time.sleep(2)
+        exit()
 
         flightArgs = {
             # URI: (relative_pos, speeds),
