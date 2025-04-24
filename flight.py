@@ -170,24 +170,14 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
 
         # Sets up the log file for this trial.
         logFile = logFolder + "/" + str(datetime.datetime.now()) + ".csv"
-        file = open(logFile, 'a')
-        file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
-        file.write("==========================================\n")
-        file.write("date: " + str(datetime.date.today()) + "\n")
-        file.write("time " + str(datetime.datetime.now().strftime("%H:%M:%S")) + "\n")
-        file.write("relativePosition: " + str(relativePos) + "\n")
-        file.write("longitudinalSeparation: " + "\n")
-        file.write("latitudinalSeparation: " + "\n")
-        file.write("velocity: " + str(speed) + "\n")
-        file.write("==========================================\n")
-        file.close()
+        CreateLogFile(logFile, relativePos, speed)
 
         # Starts logging to the log file.
-        config = StartLogging(scf, logFile)
+        logConfig = StartLogging(scf, logFile)
 
         # Gets the desired position and orientation.
         position = (relativePos[0], relativePos[1], 0)
-        orientation = math.atan(relativePos[1] / relativePos[0])
+        # orientation = math.atan(relativePos[1] / relativePos[0])
 
         # Goes to the position.
         GoToRelativePositionWithVelocity(scf, position, 0, speed)
@@ -197,4 +187,4 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
         GoToRelativePositionWithVelocity(scf, position, 0, 0.2)
 
         # Stops logging.
-        config.stop()
+        logConfig.stop()

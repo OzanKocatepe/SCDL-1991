@@ -105,3 +105,29 @@ def LogCallback(uri, timestamp, data, logFile):
     # Writes to the file in csv form and then closes it.
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
+
+def CreateLogFile(logFile: str, relativePos: tuple[float], speed: float):
+    """Creates the log file for a specific trial.
+
+    Parameters:
+        logFile: str
+            The file to create and set up the header in.
+            Assumes the folder that the file is in already
+            exists.
+        relativePos: tuple[float]
+            The relative (x, y) position the drones will be moving to in this trial.
+        speed: float
+            The speed in m/s that the drones will be travelling in this trial.
+    """
+
+    file = open(logFile, 'a')
+    file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
+    file.write("==========================================\n")
+    file.write("date: " + str(datetime.date.today()) + "\n")
+    file.write("time " + str(datetime.datetime.now().strftime("%H:%M:%S")) + "\n")
+    file.write("relativePosition: " + str(relativePos) + "\n")
+    file.write("longitudinalSeparation: " + "\n")
+    file.write("latitudinalSeparation: " + "\n")
+    file.write("velocity: " + str(speed) + "\n")
+    file.write("==========================================\n")
+    file.close()
