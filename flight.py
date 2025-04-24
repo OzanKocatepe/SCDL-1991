@@ -177,3 +177,24 @@ def FlyRouteWithDifferingSpeeds(scf, endPos: tuple[float], speeds: tuple[float],
 
         # Lands the drone and stops logging.
         Land(scf)
+
+def MoveForward(scf, distance: float):
+    """Moves the drone forward some distance.
+
+    The "forward" direction is defined as moving
+    along the straight line path all the trials take,
+    in the direction of the end point.
+    The drone will take off, move, and then land.
+
+    Parameters:
+        distance: float
+            The distance to move forward, in meters.
+    """
+    # If the distance to move is zero, just skip the rest of the function.
+    if (abs(distance) < 0.001):
+        return
+    
+    TakeOff(scf)
+    # Moves slowly to the new position.
+    GoToRelativePositionWithVelocity(scf, (-distance / math.sqrt(2), distance / math.sqrt(2)), 0, 0.2)
+    Land(scf)
