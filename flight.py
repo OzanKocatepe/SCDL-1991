@@ -62,6 +62,7 @@ def TakeOff(scf, height: float=DEFAULT_HEIGHT, duration: float=DEFAULT_TIME):
     
     # Hovers in the same position after take off.
     # For some reason, the drone likes it when you do this.
+    # Also rotates the drone to face forward during the trial.
     commander.go_to(0.0, 0.0, 0.0, 0.0, 1.0, relative=True)
     time.sleep(1.0)
 
@@ -117,7 +118,7 @@ def GoToRelativePositionWithVelocity(scf, position: tuple[float], yaw: float, ve
     commander.go_to(x, y, z, yaw, flight_time, relative=True)
     time.sleep(flight_time + DEFAULT_DELAY)
 
-def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[float], logFolder: str):
+def FlyRouteWithDifferingSpeeds(scf, endPos: tuple[float], speeds: tuple[float], heightOffset: float, logFolder: str):
     """Moves the drone back and forth with varying speed.
 
     Moves the drone back and forth between two different points at the same altitude
@@ -128,11 +129,13 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
     at the end of each round trip.
 
     Parameters:
-        relativePos: tuple[float]
+        endPos: tuple[float]
             The (x, y) position to fly the Crazyflie to (end point of each trial)
             relative to the initial position of the Crazyflie.
         speeds: tuple[float]
             The different speeds, in m/s, for the Crazyflie to iterate through.
+        heightOffset: float
+            The height, in m, above DEFAULT_HEIGHT that the drone should take off to.
         logFolder: str
             The folder to store all of the logs in. If the folder doesn't exist, it will be created.
     """
@@ -145,7 +148,7 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
             continue
         
         # Makes the drone take off.
-        TakeOff(scf)
+        TakeOff(scf, height=DEFAULT_HEIGHT + heightOffset)
 
         # If the log folder doesn't exist, we create it.
         if (not os.path.isdir(logFolder)):
@@ -153,14 +156,14 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
 
         # Sets up the log file for this trial.
         logFile = logFolder + "/" + str(datetime.datetime.now()) + ".csv"
-        CreateLogFile(logFile, relativePos, speed)
+        CreateLogFile(logFile, endPos, speed, heightOffset, 0)
 
         # Starts logging to the log file.
         logConfig = StartLogging(scf, logFile)
 
         # Gets the desired position and orientation.
-        position = (relativePos[0], relativePos[1], 0)
-        # orientation = math.atan(relativePos[1] / relativePos[0])
+        position = (endPos[0], endPos[1], 0)
+        # orientation = math.atan(endPos[1] / endPos[0])
 
         # Goes to the position.
         GoToRelativePositionWithVelocity(scf, position, 0, speed)
@@ -169,7 +172,7 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
         logConfig.stop()
         
         # Returns back to the initial position.
-        position = (-relativePos[0], -relativePos[1], 0)
+        position = (-endPos[0], -endPos[1], 0)
         GoToRelativePositionWithVelocity(scf, position, 0, 0.2)
 
         # Lands the drone and stops logging.

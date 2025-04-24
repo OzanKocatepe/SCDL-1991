@@ -46,13 +46,27 @@ if __name__ == "__main__":
         
         print("Estimators nominal.\n")
         
-        # Dictionary contatining args.
-        # Each URI entry corresponds to a tuple.
-        # The elements of the tuple then correspond to each parameter of the
-        # function being called.
-        flightArgs = {
-            # URI: (relative_pos, speeds, logFolder),
-            uris[0]: ((-1, 1), (0.2, 0.4), LOG_FOLDER),
-        }
+        relativePos = (-1 , 1) # Relative position to travel to in each trial.
+        speeds = (0.2, 0.4, 0.6, 0.8, 1) # Speeds to iterate through.
+        verticalSeperations = (0, 0.25, 0.5, 0.75, 1) # Vertical seperations to iterate through.
+        horizontalSeperations = (0.25, 0.5, 0.75, 1, 1.25, 1.5) # Horizontal seperations to iterate through.
 
-        swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        # Loops through all of the horizontal seperations. Assumes the drones are placed
+        # on the ground with a default horizontal seperation of 25cm.
+        # for horizSep in horizontalSeperations:
+            # If the current horizontal separation is not 0.25, we must move forward 0.25 units.
+            
+        # Loops through all of the vertical seperations.
+        for vertSep in (0,):
+            speeds = (0.2, 0.4)
+            # Dictionary contatining args.
+            # Each URI entry corresponds to a tuple.
+            # The elements of the tuple then correspond to each parameter of the
+            # function being called.
+            flightArgs = {
+                # URI: (relativePos, speeds, heightOffset, logFolder),
+                uris[0]: (relativePos, speeds, vertSep, LOG_FOLDER),
+                # uris[1]: (relativePos, speeds, 0, LOG_FOLDER)
+            }
+
+            swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)

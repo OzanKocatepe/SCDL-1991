@@ -109,7 +109,7 @@ def LogCallback(uri, timestamp, data, logFile):
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFile: str, relativePos: tuple[float], speed: float):
+def CreateLogFile(logFile: str, endPoint: tuple[float], speed: float, horizontalSeparation: float, verticalSeparation: float):
     """Creates the log file for a specific trial.
 
     Parameters:
@@ -117,20 +117,24 @@ def CreateLogFile(logFile: str, relativePos: tuple[float], speed: float):
             The file to create and set up the header in.
             Assumes the folder that the file is in already
             exists.
-        relativePos: tuple[float]
+        endPoint: tuple[float]
             The relative (x, y) position the drones will be moving to in this trial.
         speed: float
             The speed in m/s that the drones will be travelling in this trial.
+        horizontalSeparation: float
+            The horizontal separation between the drones, in m.
+        verticalSeparation.
+            The vertical separation between the drones, in m.
     """
 
     file = open(logFile, 'a')
     file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
     file.write("==========================================\n")
-    file.write("date: " + str(datetime.date.today()) + "\n")
-    file.write("time " + str(datetime.datetime.now().strftime("%H:%M:%S")) + "\n")
-    file.write("relativePosition: " + str(relativePos) + "\n")
-    file.write("longitudinalSeparation: " + "\n")
-    file.write("latitudinalSeparation: " + "\n")
-    file.write("velocity: " + str(speed) + "\n")
+    file.write(f"date: {str(datetime.date.today())}\n")
+    file.write(f"time: {str(datetime.datetime.now().strftime('%H:%M:%S'))}\n")
+    file.write(f"endPoint: {str(endPoint)}\n")
+    file.write(f"verticalSeparation: {verticalSeparation}\n")
+    file.write(f"horizontalSeparation: None\n")
+    file.write(f"velocity: {str(speed)}\n")
     file.write("==========================================\n")
     file.close()
