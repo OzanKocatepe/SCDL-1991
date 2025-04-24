@@ -13,9 +13,8 @@ from flight import *
 
 # The URIs of the drones that are going to be flying.
 uris = [
-    'radio://0/80/2M/E7E7E7E7E4',
-    # 'radio://0/80/2M/E7E7E7E7E6'
-    # 'radio://0/80/2M/E7E7E7E7E7'
+    # 'radio://0/80/2M/E7E7E7E7E4',
+    'radio://0/80/2M/E7E7E7E7E6'
 ]
 
 # Only output errors.
@@ -56,7 +55,4 @@ if __name__ == "__main__":
             uris[0]: ((-1, 1), (0.2, 0.4), LOG_FOLDER),
         }
 
-        swarm.parallel_safe(TakeOff)
         swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
-        time.sleep(3.0)
-        swarm.parallel_safe(Land)

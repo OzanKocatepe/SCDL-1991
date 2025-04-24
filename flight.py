@@ -11,14 +11,14 @@ from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
 DEFAULT_HEIGHT = 1.5 # Default height to fly at.
-DEFAULT_TIME = 2.0 # Default take-off or landing duration.
+DEFAULT_TIME = 3.0 # Default take-off or landing duration.
 DEFAULT_DELAY = 2.0 # Default extra time to wait after giving the Crazyflie a command.
 
 """Stores the functions related to movement of the drone.
 
 Methods:
-    WaitForEstimators:
-        Returns once the kalman estimators have been stabilized.
+    ConfigureEstimator:
+        Sets the estimators to the kalman estimator and the best lighthouse quality.
     TakeOff:
         Makes the drone take off in place.
     Land:
@@ -41,70 +41,47 @@ def ConfigureEstimator(scf):
     scf.cf.param.set_value('lighthouse.method', '0')  # 0 = best quality
     time.sleep(0.1)
 
-def WaitForEstimators(scf):
-    """Waits for the estimators to converge before flying.
-    """
-    
-    # Creates a 10 item list, with each item set to 100.
-    # We will be using it as a queue.
-    history = [1000] * 10
 
-    config = LogConfig(name="Kalman", period_in_ms=100)
-    config.add_variable("kalman.varPX", 'float')
-    config.add_variable("kalman.varPY", 'float')
-
-    # Continuously loops. We accept potentially an infinite loop because
-    # it will only occur before the Crazyflies start flying, so it can't
-    # cause any mid-air issues (which are our main safety concern).
-    while True:
-        # Gets the value of the kalman stabilizer.
-        var_x = float(scf.cf.param.get_value('kalman.varPX'))
-        var_y = float(scf.cf.param.get_value('kalman.varPY'))
-
-        # Using history as a queue, appends the sum of the stabilizer
-        # values to the end and pops the beginning of the list.
-        history.append(var_x + var_y)
-        history.pop(0)
-
-        # Checks if the difference between the maximum and minimum of
-        # the last 10 stabilizer values is less than 0.001.
-        # If so, the stabilizer values must clearly have converged.
-        if max(history) - min(history) < 0.001:
-            break
-        
-        # Sleeps for 0.1 seconds so as to not overload the Crazyflie.
-        time.sleep(0.1)
-
-def TakeOff(scf):
+def TakeOff(scf, height: float=DEFAULT_HEIGHT, duration: float=DEFAULT_TIME):
     """Makes the drone take off.
 
     Takes off to a height of DEFAULT_HEIGHT in DEFAULT_TIME seconds.
+
+    Parameters:
+        height: float
+            The height to take off to. Default value of DEFAULT_HEIGHT.
+        duration: float
+            The desired duration of the take-off. Default value of DEFAULT_TIME.
     """
 
     commander = scf.cf.high_level_commander
 
     # Tells commander to command take off.
-    commander.takeoff(DEFAULT_HEIGHT, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME + DEFAULT_DELAY)
+    commander.takeoff(height, duration)
+    time.sleep(duration + DEFAULT_DELAY)
     
     # Hovers in the same position after take off.
     # For some reason, the drone likes it when you do this.
     commander.go_to(0.0, 0.0, 0.0, 0.0, 1.0, relative=True)
     time.sleep(1.0)
 
-def Land(scf):
+def Land(scf, duration: int=DEFAULT_TIME):
     """Makes the drone land.
 
-    Tells the drone to descend to a height of 0 in DEFAULT_TIME seconds.
+    Tells the drone to descend to a height of 0.
     The drone will land directly below wherever it is at the moment.
     The high-level commander will then be stopped.
+
+    Parameters:
+        duration: int
+            The desired duration of the landing. Default value is DEFAULT_TIME.
     """
 
     commander = scf.cf.high_level_commander
 
     # Tells commander to command landing.
-    commander.land(0.0, DEFAULT_TIME)
-    time.sleep(DEFAULT_TIME + DEFAULT_DELAY)
+    commander.land(0.0, duration)
+    time.sleep(duration + DEFAULT_DELAY)
 
     commander.stop()
 
@@ -146,6 +123,9 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
     Moves the drone back and forth between two different points at the same altitude
     repeatedly with various speeds. The end point is given, and the beginning point is
     the initial position of the Crazyflie when this function is called.
+    The drone should start on the ground when this funciton is called.
+    It will take off at the beginning of each round trip, and land
+    at the end of each round trip.
 
     Parameters:
         relativePos: tuple[float]
@@ -163,6 +143,9 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
         if speed > 1:
             print(f"Specified speed of {speed} is over 1 m/s. Speed skipped.")
             continue
+        
+        # Makes the drone take off.
+        TakeOff(scf)
 
         # If the log folder doesn't exist, we create it.
         if (not os.path.isdir(logFolder)):
@@ -181,10 +164,13 @@ def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[fl
 
         # Goes to the position.
         GoToRelativePositionWithVelocity(scf, position, 0, speed)
+
+        # Stops logging.
+        logConfig.stop()
         
         # Returns back to the initial position.
         position = (-relativePos[0], -relativePos[1], 0)
         GoToRelativePositionWithVelocity(scf, position, 0, 0.2)
 
-        # Stops logging.
-        logConfig.stop()
+        # Lands the drone and stops logging.
+        Land(scf)

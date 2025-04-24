@@ -1,3 +1,4 @@
+import datetime
 import time
 import logging
 
@@ -18,6 +19,8 @@ Methods:
         Tells the Crazyflie to begin logging the required variables.
     LogCallback:
         Saves the drone data to a .csv every time a packet comes in.
+    CreateLogFile:
+        Creates the log file for a specific trial.
 """
 
 def LightCheck(scf):
