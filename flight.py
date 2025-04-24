@@ -154,13 +154,18 @@ def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[f
 
     # Loops through each speed.
     for speed in speeds:
+        # If the speed is greater than 1, we don't allow the speed to be used.
+        if speed > 1:
+            print(f"Specified speed of {speed} is over 1 m/s. Speed skipped.")
+            continue
+
         # Gets the desired position and orientation.
         position = (relative_pos[0], relative_pos[1], 0)
         orientation = math.atan(relative_pos[1] / relative_pos[0])
 
         # Goes to the position.
-        GoToRelativePositionWithVelocity(scf, position, orientation, speed)
+        GoToRelativePositionWithVelocity(scf, position, 0, speed)
         
         # Returns back to the initial position.
         position = (-relative_pos[0], -relative_pos[1], 0)
-        GoToRelativePositionWithVelocity(scf, position, orientation + math.pi, speed)
+        GoToRelativePositionWithVelocity(scf, position, 0, 0.2)
