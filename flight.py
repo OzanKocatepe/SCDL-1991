@@ -1,6 +1,9 @@
-import time
+import datetime
 import logging
 import math
+import os
+
+from logs import *
 
 import cflib.crtp
 from cflib.crazyflie.swarm import CachedCfFactory
@@ -137,7 +140,7 @@ def GoToRelativePositionWithVelocity(scf, position: tuple[float], yaw: float, ve
     commander.go_to(x, y, z, yaw, flight_time, relative=True)
     time.sleep(flight_time + DEFAULT_DELAY)
 
-def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[float]):
+def FlyRouteWithDifferingSpeeds(scf, relativePos: tuple[float], speeds: tuple[float], logFolder: str):
     """Moves the drone back and forth with varying speed.
 
     Moves the drone back and forth between two different points at the same altitude
@@ -145,11 +148,13 @@ def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[f
     the initial position of the Crazyflie when this function is called.
 
     Parameters:
-        relative_pos: tuple[float]
+        relativePos: tuple[float]
             The (x, y) position to fly the Crazyflie to (end point of each trial)
             relative to the initial position of the Crazyflie.
         speeds: tuple[float]
             The different speeds, in m/s, for the Crazyflie to iterate through.
+        logFolder: str
+            The folder to store all of the logs in. If the folder doesn't exist, it will be created.
     """
 
     # Loops through each speed.
@@ -159,13 +164,37 @@ def FlyRouteWithDifferingSpeeds(scf, relative_pos: tuple[float], speeds: tuple[f
             print(f"Specified speed of {speed} is over 1 m/s. Speed skipped.")
             continue
 
+        # If the log folder doesn't exist, we create it.
+        if (not os.path.isdir(logFolder)):
+            os.mkdir(logFolder)
+
+        # Sets up the log file for this trial.
+        logFile = logFolder + "/" + str(datetime.datetime.now()) + ".csv"
+        file = open(logFile, 'a')
+        file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
+        file.write("==========================================\n")
+        file.write("date: " + str(datetime.date.today()) + "\n")
+        file.write("time " + str(datetime.datetime.now().strftime("%H:%M:%S")) + "\n")
+        file.write("relativePosition: " + str(relativePos) + "\n")
+        file.write("longitudinalSeparation: " + "\n")
+        file.write("latitudinalSeparation: " + "\n")
+        file.write("velocity: " + str(speed) + "\n")
+        file.write("==========================================\n")
+        file.close()
+
+        # Starts logging to the log file.
+        config = StartLogging(scf, logFile)
+
         # Gets the desired position and orientation.
-        position = (relative_pos[0], relative_pos[1], 0)
-        orientation = math.atan(relative_pos[1] / relative_pos[0])
+        position = (relativePos[0], relativePos[1], 0)
+        orientation = math.atan(relativePos[1] / relativePos[0])
 
         # Goes to the position.
         GoToRelativePositionWithVelocity(scf, position, 0, speed)
         
         # Returns back to the initial position.
-        position = (-relative_pos[0], -relative_pos[1], 0)
+        position = (-relativePos[0], -relativePos[1], 0)
         GoToRelativePositionWithVelocity(scf, position, 0, 0.2)
+
+        # Stops logging.
+        config.stop()

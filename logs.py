@@ -28,21 +28,23 @@ def LightCheck(scf):
     time.sleep(2)
     scf.cf.param.set_value('led.bitmask', 0)
 
-def StartLogging(scf, log_file):
+def StartLogging(scf, logFile) -> LogConfig:
     """Tells the Crazyflie to start logging.
 
     Creates the desired log config and callback function and
     starts logging.
 
     Parameters:
-        log_file: str
+        logFile: str
             The file that the logged data will be saved to.
-    """
+            Assumes that the file already exists.
 
-    # Creates the log file.
-    file = open(log_file, "w")
-    file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
-    file.close()
+    Returns:
+        LogConfig:
+            The log config created in the function. This is returned
+            so that the calling function can maintain a reference to
+            the config in case it wants to stop logging.
+    """
 
     # Defines our log configs.
     config = LogConfig(name='Pos, Vel & Battery', period_in_ms=100)
@@ -64,10 +66,12 @@ def StartLogging(scf, log_file):
     scf.cf.log.add_config(config)
 
     # Adds the callback functions and starts logging.
-    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(scf.cf.link_uri, timestamp, data, log_file))
+    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(scf.cf.link_uri, timestamp, data, logFile))
     config.start()
 
-def LogCallback(uri, timestamp, data, log_file):
+    return config
+
+def LogCallback(uri, timestamp, data, logFile):
     """Saves the data from the Crazyflie to a file. 
 
     This function is called every time a packet containing
@@ -75,7 +79,7 @@ def LogCallback(uri, timestamp, data, log_file):
     into a .csv file.
 
     Parameters:
-        log_file: str
+        logFile: str
             The file that the logged data will be saved to.
     """
     
@@ -96,7 +100,7 @@ def LogCallback(uri, timestamp, data, log_file):
     vel[2] = data['stateEstimate.vz']
 
     # Opens the file in append mode.
-    file = open(log_file, "a")
+    file = open(logFile, "a")
 
     # Writes to the file in csv form and then closes it.
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')

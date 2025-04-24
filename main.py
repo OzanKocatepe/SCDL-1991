@@ -51,20 +51,9 @@ if __name__ == "__main__":
         # Each URI entry corresponds to a tuple.
         # The elements of the tuple then correspond to each parameter of the
         # function being called.
-        startLoggingArgs = {
-            # URI: (log_file,),
-            uris[0]: (LOG_FOLDER + "/" + str(datetime.datetime.now()) + ".csv",),
-        }
-
-        # Sets up the logging config so that it outputs to the proper file.
-        swarm.parallel_safe(StartLogging, args_dict=startLoggingArgs)
-        print("Logging started.")
-        # time.sleep(2)
-        # exit()
-
         flightArgs = {
-            # URI: (relative_pos, speeds),
-            uris[0]: ((-1, 1), (0.2, 0.4)),
+            # URI: (relative_pos, speeds, logFolder),
+            uris[0]: ((-1, 1), (0.2, 0.4), LOG_FOLDER),
         }
 
         swarm.parallel_safe(TakeOff)
