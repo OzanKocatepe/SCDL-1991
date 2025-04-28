@@ -134,7 +134,7 @@ def CreateLogFile(logFile: str, endPoint: tuple[float], speed: float, horizontal
     file.write(f"time: {str(datetime.datetime.now().strftime('%H:%M:%S'))}\n")
     file.write(f"endPoint: {str(endPoint)}\n")
     file.write(f"verticalSeparation: {verticalSeparation}\n")
-    file.write(f"horizontalSeparation: None\n")
+    file.write(f"horizontalSeparation: {horizontalSeparation}\n")
     file.write(f"velocity: {str(speed)}\n")
     file.write("==========================================\n")
     file.close()
