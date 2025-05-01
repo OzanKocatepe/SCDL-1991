@@ -41,7 +41,7 @@ def take_off_simple(scf):
         mc.stop()
 
 # Gets URI (as described in connect_log_param.py)
-URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E4')
+URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
 # Creates an event for whether the deck is attached or not (idk how events work).
 deck_attached_event = Event()
 logging.basicConfig(level=logging.ERROR)

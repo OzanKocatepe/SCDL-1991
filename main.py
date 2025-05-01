@@ -54,29 +54,36 @@ if __name__ == "__main__":
 
         # Loops through all of the horizontal seperations. Assumes the drones are placed
         # on the ground with a default horizontal seperation of 25cm.
-        for horizSep in (0.25, 0.5):
-            # If the current horizontal separation is not 0.25, we must move forward 0.25 units.
-            if horizSep != 0.25:
-                # Sets the arguments so that only the front drone moves.
-                moveArgs = {
-                    # URI: (distance,)
-                    uris[0]: (0.25,),
-                    # uris[1]: (0,)
-                }
+        # for horizSep in (0.25, 0.5):
+        #     # If the current horizontal separation is not 0.25, we must move forward 0.25 units.
+        #     if horizSep != 0.25:
+        #         # Sets the arguments so that only the front drone moves.
+        #         moveArgs = {
+        #             # URI: (distance,)
+        #             uris[0]: (0.25,),
+        #             # uris[1]: (0,)
+        #         }
 
-                swarm.parallel_safe(MoveForward, args_dict=moveArgs)
+        #         swarm.parallel_safe(MoveForward, args_dict=moveArgs)
 
-            # Loops through all of the vertical seperations.
-            for vertSep in (0, 0.25):
-                speeds = (0.2, 0.4)
-                # Dictionary contatining args.
-                # Each URI entry corresponds to a tuple.
-                # The elements of the tuple then correspond to each parameter of the
-                # function being called.
-                flightArgs = {
-                    # URI: (relativePos, speeds, heightOffset, logFolder),
-                    uris[0]: (relativePos, speeds, vertSep, LOG_FOLDER),
-                    # uris[1]: (relativePos, speeds, 0, LOG_FOLDER)
-                }
+        #     # Loops through all of the vertical seperations.
+        #     for vertSep in (0, 0.25):
+        #         speeds = (0.2, 0.4)
+        #         # Dictionary contatining args.
+        #         # Each URI entry corresponds to a tuple.
+        #         # The elements of the tuple then correspond to each parameter of the
+        #         # function being called.
+        #         flightArgs = {
+        #             # URI: (relativePos, speeds, heightOffset, logFolder),
+        #             uris[0]: (relativePos, speeds, vertSep, LOG_FOLDER),
+        #             # uris[1]: (relativePos, speeds, 0, LOG_FOLDER)
+        #         }
 
-                swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+                # swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
+        args = {
+            uris[0]: (1,),
+        }
+        
+        swarm.parallel_safe(TakeOff)
+        # swarm.parallel_safe(MoveForward, args_dict=args)
+        swarm.parallel_safe(Land)

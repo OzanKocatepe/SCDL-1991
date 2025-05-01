@@ -10,7 +10,7 @@ from cflib.crazyflie.swarm import CachedCfFactory
 from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
-DEFAULT_HEIGHT = 1.5 # Default height to fly at.
+DEFAULT_HEIGHT = 1 # Default height to fly at.
 DEFAULT_TIME = 3.0 # Default take-off or landing duration.
 DEFAULT_DELAY = 2.0 # Default extra time to wait after giving the Crazyflie a command.
 
@@ -63,8 +63,8 @@ def TakeOff(scf, height: float=DEFAULT_HEIGHT, duration: float=DEFAULT_TIME):
     # Hovers in the same position after take off.
     # For some reason, the drone likes it when you do this.
     # Also rotates the drone to face forward during the trial.
-    commander.go_to(0.0, 0.0, 0.0, 0.0, 1.0, relative=True)
-    time.sleep(1.0)
+    # commander.go_to(0.0, 0.0, 0.0, 0.0, 1.0, relative=True)
+    # time.sleep(1.0)
 
 def Land(scf, duration: int=DEFAULT_TIME):
     """Makes the drone land.
@@ -194,7 +194,7 @@ def MoveForward(scf, distance: float):
     if (abs(distance) < 0.001):
         return
     
-    TakeOff(scf)
+    # TakeOff(scf)
     # Moves slowly to the new position.
-    GoToRelativePositionWithVelocity(scf, (-distance / math.sqrt(2), distance / math.sqrt(2)), 0, 0.2)
-    Land(scf)
+    GoToRelativePositionWithVelocity(scf, (-distance / math.sqrt(2), distance / math.sqrt(2), 0), 0, 0.2)
+    # Land(scf)
