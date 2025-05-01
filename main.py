@@ -13,8 +13,9 @@ from flight import *
 
 # The URIs of the drones that are going to be flying.
 uris = [
-    'radio://0/80/2M/E7E7E7E7E4',
-    'radio://0/80/2M/E7E7E7E7E6'
+    # 'radio://0/80/2M/E7E7E7E7E4',
+    # 'radio://0/80/2M/E7E7E7E7E6'
+    'radio://0/80/2M/E7E7E7E7E8'
 ]
 
 # Only output errors.
@@ -60,7 +61,7 @@ if __name__ == "__main__":
                 moveArgs = {
                     # URI: (distance,)
                     uris[0]: (0.25,),
-                    uris[1]: (0,)
+                    # uris[1]: (0,)
                 }
 
                 swarm.parallel_safe(MoveForward, args_dict=moveArgs)
@@ -75,7 +76,7 @@ if __name__ == "__main__":
                 flightArgs = {
                     # URI: (relativePos, speeds, heightOffset, logFolder),
                     uris[0]: (relativePos, speeds, vertSep, LOG_FOLDER),
-                    uris[1]: (relativePos, speeds, 0, LOG_FOLDER)
+                    # uris[1]: (relativePos, speeds, 0, LOG_FOLDER)
                 }
 
                 swarm.parallel_safe(FlyRouteWithDifferingSpeeds, args_dict=flightArgs)
