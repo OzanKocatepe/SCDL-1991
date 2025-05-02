@@ -3,8 +3,8 @@ import time
 import logging
 
 import cflib.crtp
-from cflib.crazyflie.swarm import CachedCfFactory
-from cflib.crazyflie.swarm import Swarm
+# from cflib.crazyflie.swarm import CachedCfFactory
+# from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
 """Stores all the functions for logging.
@@ -31,7 +31,7 @@ def LightCheck(scf):
     time.sleep(2)
     scf.cf.param.set_value('led.bitmask', 0)
 
-def StartLogging(scf, logFile) -> LogConfig:
+def StartLogging(scf, logFile: str) -> LogConfig:
     """Tells the Crazyflie to start logging.
 
     Creates the desired log config and callback function and
@@ -74,7 +74,7 @@ def StartLogging(scf, logFile) -> LogConfig:
 
     return config
 
-def LogCallback(uri, timestamp, data, logFile):
+def LogCallback(uri, timestamp, data, logFile: str):
     """Saves the data from the Crazyflie to a file. 
 
     This function is called every time a packet containing
