@@ -25,9 +25,8 @@ if __name__ == '__main__':
     with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         # Flashes the lights on the connected drone.
         LightCheck(scf)
-        time.sleep(1.0)
 
-        # Arm the Crazyflie (told to do this in docs, don't know what exactly this does).
+        # Arm the Crazyflie.
         scf.cf.platform.send_arming_request(True)
         time.sleep(1.0)
 
