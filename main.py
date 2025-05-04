@@ -1,5 +1,4 @@
 import logging
-import sys
 import time
 import threading
 
@@ -20,6 +19,13 @@ URIS = [
     "radio://0/80/2M/E7E7E7E7E4", # LEADING DRONE
     "radio://1/60/2M/E7E7E7E7E6"  # TRAILING DRONE
 ]
+
+# Sets the time for the Crazyflies start execution
+# some seconds after the program starts running.
+START_TIME = time.time() + 5.0
+
+# Sets the time for the Crazyflies to start moving.
+FLIGHT_TIME = START_TIME + 10.0
 
 # Only logs errors.
 logging.basicConfig(level=logging.ERROR)
@@ -46,19 +52,29 @@ def main(uri: str) -> None:
         # Detects the desired deck.
         DetectDeck(scf)
 
-        HORIZONTAL_SEPARATION = 1.5     # (0.25, 0.5, 0.75, 1.0, 1.25, 1.5)
-        VERTICAL_SEPARATION = 1.0       # (0, 0.25, 0.5, 0.75, 1.0)
-        SPEED = 0.2                     # (0.2, 0.4, 0.6, 0.8, 1.0)
+        horizontalSeparation = 1.5     # (0.25, 0.5, 0.75, 1.0, 1.25, 1.5)
+        verticalSeparation = 1.0       # (0, 0.25, 0.5, 0.75, 1.0)
+        speed = 0.2                     # (0.2, 0.4, 0.6, 0.8, 1.0)
 
         # If the current drone is the leading drone,
         # gives it an extra height for vertical separation.
-        if (uri == uri[0]):
-            extraHeight = VERTICAL_SEPARATION
+        # Also, adds delay to the trailing drone
+        # to allow the first drone to stabilise
+        # before the second drone takes off and lands.
+        if (uri == URIS[0]):
+            extraHeight = verticalSeparation
+            extraDelay = 0
         else:
             extraHeight = 0
+            extraDelay = 5.0
+
+        # Waits until the start time.
+        waitTime = START_TIME + extraDelay - time.time()
+        while (waitTime > 0):
+            time.sleep(waitTime)
 
         # Runs the trial with the proper parameters.
-        RunOneTrial(scf, LOG_FOLDER, DISTANCE, SPEED, HORIZONTAL_SEPARATION, extraHeight)
+        RunOneTrial(scf, LOG_FOLDER, DISTANCE, speed, horizontalSeparation, extraHeight)
                 
 # Launch each Crazyflie in its own thread
 threads = []

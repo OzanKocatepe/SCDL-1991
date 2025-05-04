@@ -1,10 +1,6 @@
 import datetime
 import time
-import logging
 
-import cflib.crtp
-# from cflib.crazyflie.swarm import CachedCfFactory
-# from cflib.crazyflie.swarm import Swarm
 from cflib.crazyflie.log import LogConfig
 
 """Stores all the functions for logging.
@@ -28,7 +24,7 @@ def LightCheck(scf):
     """
 
     scf.cf.param.set_value('led.bitmask', 255)
-    time.sleep(2)
+    time.sleep(1.0)
     scf.cf.param.set_value('led.bitmask', 0)
 
 def StartLogging(scf, logFile: str) -> LogConfig:

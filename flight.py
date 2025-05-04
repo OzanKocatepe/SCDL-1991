@@ -11,6 +11,8 @@ DEFAULT_DELAY = 5.0
 Methods:
     DetectDeck:
         Checks whether the lighthouse deck is attached.
+    DiagnosticFlight:
+        Runs a simple test flight to confirm the drone is fully operational.
     RunOneTrial:
         Runs a single trial with the desired parameters
         (distance, speed, and height).
@@ -49,7 +51,7 @@ def DiagnosticFlight(scf):
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float=0) -> None:
+def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float, startTime: float) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -70,7 +72,9 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
             The horizontal separation between the drones in this trial.
             Only given to this function to pass forward to the log file upon creation.
         verticalSeparation: float
-            The height above DEFAULT_HEIGHT to take off to. Zero by default. 
+            The height above DEFAULT_HEIGHT to take off to.
+        startTime: float
+            The time to wait until before starting to move.
     """
 
     # Takes off with motion commander to the desired height.
@@ -84,6 +88,11 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
 
         # Starts logging.
         log = StartLogging(scf, logFile)
+
+        # Waits until the start time to start flying.
+        waitTime = startTime - time.time()
+        while (waitTime > 0):
+            time.sleep(waitTime)
         
         # Moves to the end of the trial.
         mc.forward(distance, velocity=speed)
