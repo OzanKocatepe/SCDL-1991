@@ -3,8 +3,8 @@ import sys
 from cflib.positioning.motion_commander import MotionCommander
 from logs import *
 
-DEFAULT_HEIGHT = 1.0
-DEFAULT_DELAY = 3.0
+DEFAULT_HEIGHT = 0.5
+DEFAULT_DELAY = 5.0
 
 """Stores the functions related to movement of the drone.
 
@@ -29,7 +29,24 @@ def DetectDeck(scf) -> None:
     else:
         print("Deck attached.")
 
-def RunOneTrial(scf, distance: float, speed: float, height: float=DEFAULT_HEIGHT) -> None:
+def DiagnosticFlight(scf):
+    with MotionCommander(scf, default_height=DEFAULT_HEIGHT) as mc:
+        time.sleep(DEFAULT_DELAY)
+        mc.forward(1)
+        time.sleep(DEFAULT_DELAY)
+        mc.up(0.5)
+        time.sleep(DEFAULT_DELAY)
+        mc.turn_right(180)
+        time.sleep(DEFAULT_DELAY)
+        mc.forward(1)
+        time.sleep(DEFAULT_DELAY)
+        mc.down(0.5)
+        time.sleep(DEFAULT_DELAY)
+        mc.turn_left(180)
+        time.sleep(DEFAULT_DELAY)
+
+
+def RunOneTrial(scf, distance: float, speed: float, logFolder: str, height: float=DEFAULT_HEIGHT) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -62,11 +79,11 @@ def RunOneTrial(scf, distance: float, speed: float, height: float=DEFAULT_HEIGHT
         log = StartLogging(scf, logFile)
         
         # Moves to the end of the trial.
-        mc.forward(distance, speed)
+        mc.forward(distance, velocity=speed)
         time.sleep(DEFAULT_DELAY)
 
         # Moves back to the beginning.
-        mc.back(distance, speed=0.2)
+        mc.back(distance, velocity=0.2)
         time.sleep(DEFAULT_DELAY)
 
         # Stops logging.
