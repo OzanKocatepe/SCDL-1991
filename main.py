@@ -12,7 +12,7 @@ from cflib.utils import uri_helper
 
 # Constants.
 LOG_FOLDER = "./logs"
-DISTANCE = 2.0
+TRIAL_DISTANCE = 2.0
 
 # Gets URI
 URIS = [
@@ -74,7 +74,7 @@ def main(uri: str) -> None:
             time.sleep(waitTime)
 
         # Runs the trial with the proper parameters.
-        RunOneTrial(scf, LOG_FOLDER, DISTANCE, speed, horizontalSeparation, extraHeight)
+        RunOneTrial(scf, LOG_FOLDER, TRIAL_DISTANCE, speed, horizontalSeparation, extraHeight)
                 
 # Launch each Crazyflie in its own thread
 threads = []
