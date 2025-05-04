@@ -30,6 +30,9 @@ def DetectDeck(scf) -> None:
         print("Deck attached.")
 
 def DiagnosticFlight(scf):
+    """Does a simple test flight to confirm the drone is fully operational.
+    """
+
     with MotionCommander(scf, default_height=DEFAULT_HEIGHT) as mc:
         time.sleep(DEFAULT_DELAY)
         mc.forward(1)
@@ -46,7 +49,7 @@ def DiagnosticFlight(scf):
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, distance: float, speed: float, logFolder: str, height: float=DEFAULT_HEIGHT) -> None:
+def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float=0) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -54,6 +57,8 @@ def RunOneTrial(scf, distance: float, speed: float, logFolder: str, height: floa
     back to the beginning, and then landing.
 
     Parameters:
+        logFolder: str
+            The folder to store the file in which all the trial data will be logged.
         distance: float
             The distance in meters to move forward. i.e.
             the length of the trial.
@@ -61,19 +66,21 @@ def RunOneTrial(scf, distance: float, speed: float, logFolder: str, height: floa
             The speed in m/s to travel at (only in the
             forward direction, the backwards direction is always
             0.2 m/s).
-        height: float
-            The height to take off to. By default takes off
-            to DEFAULT_HEIGHT.
+        horizontalSeparation: float
+            The horizontal separation between the drones in this trial.
+            Only given to this function to pass forward to the log file upon creation.
+        verticalSeparation: float
+            The height above DEFAULT_HEIGHT to take off to. Zero by default. 
     """
 
     # Takes off with motion commander to the desired height.
-    with MotionCommander(scf, default_height=height) as mc:
+    with MotionCommander(scf, default_height=DEFAULT_HEIGHT + verticalSeparation) as mc:
         # Pauses after taking off to stabilise.
         time.sleep(DEFAULT_DELAY)
 
         # Creates the required log file.
         logFile = logFolder + "/" + str(datetime.datetime.now()) + ".csv"
-        CreateLogFile(logFile, 0, speed, 0, 0) # Need to fix this part, actually put correct values.
+        CreateLogFile(logFile, distance, speed, horizontalSeparation, verticalSeparation)
 
         # Starts logging.
         log = StartLogging(scf, logFile)

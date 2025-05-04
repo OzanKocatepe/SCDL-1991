@@ -109,7 +109,7 @@ def LogCallback(uri, timestamp, data, logFile: str):
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFile: str, endPoint: tuple[float], speed: float, horizontalSeparation: float, verticalSeparation: float):
+def CreateLogFile(logFile: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float):
     """Creates the log file for a specific trial.
 
     Parameters:
@@ -117,8 +117,8 @@ def CreateLogFile(logFile: str, endPoint: tuple[float], speed: float, horizontal
             The file to create and set up the header in.
             Assumes the folder that the file is in already
             exists.
-        endPoint: tuple[float]
-            The relative (x, y) position the drones will be moving to in this trial.
+        distance: float
+            The distance in m which the drone will travel during this trial.
         speed: float
             The speed in m/s that the drones will be travelling in this trial.
         horizontalSeparation: float
@@ -132,7 +132,7 @@ def CreateLogFile(logFile: str, endPoint: tuple[float], speed: float, horizontal
     file.write("==========================================\n")
     file.write(f"date: {str(datetime.date.today())}\n")
     file.write(f"time: {str(datetime.datetime.now().strftime('%H:%M:%S'))}\n")
-    file.write(f"endPoint: {str(endPoint)}\n")
+    file.write(f"distance: {str(distance)}\n")
     file.write(f"verticalSeparation: {verticalSeparation}\n")
     file.write(f"horizontalSeparation: {horizontalSeparation}\n")
     file.write(f"velocity: {str(speed)}\n")
