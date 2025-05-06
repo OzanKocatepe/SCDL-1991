@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 
 from cflib.crazyflie.log import LogConfig
@@ -105,14 +106,12 @@ def LogCallback(uri, timestamp, data, logFile: str):
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFile: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float):
+def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float):
     """Creates the log file for a specific trial.
 
     Parameters:
-        logFile: str
-            The file to create and set up the header in.
-            Assumes the folder that the file is in already
-            exists.
+        logFolder: str
+            The folder to create the log file in.
         distance: float
             The distance in m which the drone will travel during this trial.
         speed: float
@@ -123,14 +122,27 @@ def CreateLogFile(logFile: str, distance: float, speed: float, horizontalSeparat
             The vertical separation between the drones, in m.
     """
 
+    # Determines how many files have already been created today
+    # so that it can accurately set the index in the log file's name.
+    filesToday = 0
+    logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
+    while (os.path.exists(logFile)):
+        filesToday += 1
+        logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
+
+    # Creates the file or appends data to an already
+    # existing file and writes the header to the file.
+    # We choose to append instead of overwrite so that if the code
+    # above breaks and we write to a file that already exists, we don't
+    # lose the data stored within that file.
     file = open(logFile, 'a')
     file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
     file.write("==========================================\n")
     file.write(f"date: {str(datetime.date.today())}\n")
     file.write(f"time: {str(datetime.datetime.now().strftime('%H:%M:%S'))}\n")
     file.write(f"distance: {str(distance)}\n")
-    file.write(f"verticalSeparation: {verticalSeparation}\n")
-    file.write(f"horizontalSeparation: {horizontalSeparation}\n")
     file.write(f"velocity: {str(speed)}\n")
+    file.write(f"horizontalSeparation: {horizontalSeparation}\n")
+    file.write(f"verticalSeparation: {verticalSeparation}\n")
     file.write("==========================================\n")
     file.close()

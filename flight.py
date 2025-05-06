@@ -83,8 +83,7 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         time.sleep(DEFAULT_DELAY)
 
         # Creates the required log file.
-        logFile = logFolder + "/" + str(datetime.datetime.now()) + ".csv"
-        CreateLogFile(logFile, distance, speed, horizontalSeparation, verticalSeparation)
+        CreateLogFile(logFolder, distance, speed, horizontalSeparation, verticalSeparation)
 
         # Starts logging.
         log = StartLogging(scf, logFile)
