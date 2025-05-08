@@ -12,7 +12,7 @@ from cflib.utils import uri_helper
 
 # Constants.
 LOG_FOLDER = "./logs"
-TRIAL_DISTANCE = 1.0
+TRIAL_DISTANCE = 2.5 # The distance travelled by the leading drone when its 1.0m away from the trailing drone.
 
 # Gets URI
 URIS = [
@@ -29,22 +29,26 @@ cflib.crtp.init_drivers()
 with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
     with SyncCrazyflie(URIS[1], cf=Crazyflie(rw_cache='./cache')) as scf2:
         
-        horizontalSeparation = 1.5      # (0.25, 0.5, 0.75, 1.0, 1.25, 1.5)
-        verticalSeparation = 0          # (0, 0.25, 0.5, 0.75, 1.0)
-        speed = 0.2                     # (0.2, 0.4, 0.6, 0.8, 1.0)
-        extraHeight = [verticalSeparation, 0]
+        # Stores the scf references.
+        scf = [scf1, scf2]
 
+        # Stores the trial parameters.
+        horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
+        extraHeight = [0.75, 0]      # (0.75, 0.5, 0.25, 0)
+        speed = 0.5                 # (0.5, 0.75, 1.0)
+        distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
+
+        # Sets the times for take off and movement.
         referenceTime = time.time()
-        takeOffTime = [time.time(), time.time() + 5.0]
+        takeOffTime = [referenceTime, referenceTime + 5.0]
         movementTime = takeOffTime[1] + 10.0
 
         # Launch each Crazyflie in its own thread
         threads = []
-        scf = [scf1, scf2]
 
         # Creates a thread for each drone. 
         for i in range(len(URIS)):
-            t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, TRIAL_DISTANCE, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime))
+            t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime))
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
             t.start()
             threads.append(t)

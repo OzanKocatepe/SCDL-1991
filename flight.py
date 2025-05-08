@@ -11,6 +11,9 @@ DEFAULT_DELAY = 5.0
 Methods:
     DetectDeck:
         Checks whether the lighthouse deck is attached.
+    DiagnosticFlightSimple:
+        Takes off, pauses, then lands the drone immediately.
+        This is used when a full diagnostic flight isn't necessary.
     DiagnosticFlight:
         Runs a simple test flight to confirm the drone is fully operational.
     RunOneTrial:
@@ -32,6 +35,9 @@ def DetectDeck(scf) -> None:
         print("Deck attached.")
 
 def DiagnosticFlightSimple(scf) -> None:
+    """Takes off, pauses, then immediately lands the drone.
+    """
+
     with MotionCommander(scf, default_height=DEFAULT_HEIGHT) as mc:
         time.sleep(DEFAULT_DELAY)
 
@@ -55,7 +61,7 @@ def DiagnosticFlight(scf) -> None:
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float, takeOffTime: float, movementTime: float) -> None:
+def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, takeOffTime: float, movementTime: float) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -75,7 +81,7 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         horizontalSeparation: float
             The horizontal separation between the drones in this trial.
             Only given to this function to pass forward to the log file upon creation.
-        verticalSeparation: float
+        extraHeight: float
             The height above DEFAULT_HEIGHT to take off to.
         takeOffTime: float
             The time to wait until before taking off.
@@ -89,12 +95,12 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         time.sleep(waitTime)
 
     # Takes off with motion commander to the desired height.
-    with MotionCommander(scf, default_height=DEFAULT_HEIGHT + verticalSeparation) as mc:
+    with MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight) as mc:
         # Pauses after taking off to stabilise.
         time.sleep(DEFAULT_DELAY)
 
         # Creates the required log file.
-        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, verticalSeparation)
+        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight)
 
         # Starts logging.
         log = StartLogging(scf, logFile)
@@ -109,8 +115,8 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         time.sleep(DEFAULT_DELAY)
 
         # Moves back to the beginning.
-        mc.back(distance, velocity=0.2)
-        time.sleep(DEFAULT_DELAY)
+        # mc.back(distance, velocity=0.2)
+        # time.sleep(DEFAULT_DELAY)
 
         # Stops logging.
         log.stop()

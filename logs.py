@@ -71,7 +71,7 @@ def StartLogging(scf, logFile: str) -> LogConfig:
 
     return config
 
-def LogCallback(uri, timestamp, data, logFile: str):
+def LogCallback(uri, timestamp, data, logFile: str) -> None:
     """Saves the data from the Crazyflie to a file. 
 
     This function is called every time a packet containing
@@ -106,7 +106,7 @@ def LogCallback(uri, timestamp, data, logFile: str):
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float) -> str:
+def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float) -> str:
     """Creates the log file for a specific trial.
 
     Parameters:
@@ -118,8 +118,8 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
             The speed in m/s that the drones will be travelling in this trial.
         horizontalSeparation: float
             The horizontal separation between the drones, in m.
-        verticalSeparation.
-            The vertical separation between the drones, in m.
+        extraHeight: float
+            The height above DEFAULT_HEIGHT that the drone is taking off to. 
 
     Returns:
         The path to the newly created log file.
@@ -146,7 +146,7 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
     file.write(f"distance: {str(distance)}\n")
     file.write(f"velocity: {str(speed)}\n")
     file.write(f"horizontalSeparation: {horizontalSeparation}\n")
-    file.write(f"verticalSeparation: {verticalSeparation}\n")
+    file.write(f"heightAboveDefault: {extraHeight}\n")
     file.write("==========================================\n")
     file.close()
 
