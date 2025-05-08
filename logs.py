@@ -106,7 +106,7 @@ def LogCallback(uri, timestamp, data, logFile: str) -> None:
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float) -> str:
+def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, repetition: int) -> str:
     """Creates the log file for a specific trial.
 
     Parameters:
@@ -120,6 +120,8 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
             The horizontal separation between the drones, in m.
         extraHeight: float
             The height above DEFAULT_HEIGHT that the drone is taking off to. 
+        repetition: int
+            The repetition currently being done for this trial (combination of parameters).
 
     Returns:
         The path to the newly created log file.
@@ -147,6 +149,7 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
     file.write(f"velocity: {str(speed)}\n")
     file.write(f"horizontalSeparation: {horizontalSeparation}\n")
     file.write(f"heightAboveDefault: {extraHeight}\n")
+    file.write(f"trial: {repetition}\n")
     file.write("==========================================\n")
     file.close()
 

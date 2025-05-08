@@ -61,7 +61,7 @@ def DiagnosticFlight(scf) -> None:
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, takeOffTime: float, movementTime: float) -> None:
+def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, takeOffTime: float, movementTime: float, repetition: int) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -87,6 +87,10 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
             The time to wait until before taking off.
         movementTime: float
             The time to wait until before starting to move.
+        repetition: int
+            The repetition for this trial that is being completed.
+            Only passed through so that it can be sent to the
+            log file header.
     """
 
     # Waits until the take off time to take off.
@@ -100,7 +104,7 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         time.sleep(DEFAULT_DELAY)
 
         # Creates the required log file.
-        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight)
+        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
 
         # Starts logging.
         log = StartLogging(scf, logFile)
