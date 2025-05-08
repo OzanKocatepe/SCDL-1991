@@ -12,79 +12,43 @@ from cflib.utils import uri_helper
 
 # Constants.
 LOG_FOLDER = "./logs"
-TRIAL_DISTANCE = 2.0
+TRIAL_DISTANCE = 1.0
 
 # Gets URI
 URIS = [
-    "radio://0/80/2M/E7E7E7E7E4", # LEADING DRONE
-    "radio://1/60/2M/E7E7E7E7E6"  # TRAILING DRONE
+    "radio://0/60/2M/E7E7E7E7E6", # LEADING DRONE
+    "radio://1/80/2M/E7E7E7E7E4"  # TRAILING DRONE
 ]
-
-# Sets the time for the Crazyflies start execution
-# some seconds after the program starts running.
-START_TIME = time.time() + 5.0
-
-# Sets the time for the Crazyflies to start moving.
-FLIGHT_TIME = START_TIME + 10.0
 
 # Only logs errors.
 logging.basicConfig(level=logging.ERROR)
 
-def main(uri: str) -> None:
-    """This is the main code that will be run by each drone in each thread.
-    
-    Parameters:
-        uri: str
-            The URI of the drone currently being controlled.
-    """
+# Initialises the drivers.
+cflib.crtp.init_drivers()
 
-    # Initialises the drivers.
-    cflib.crtp.init_drivers()
-
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
-        # Flashes the lights on the connected drone.
-        LightCheck(scf)
-
-        # Arms the Crazyflie.
-        scf.cf.platform.send_arming_request(True)
-        time.sleep(1.0)
-
-        # Detects the desired deck.
-        DetectDeck(scf)
-
-        horizontalSeparation = 1.5     # (0.25, 0.5, 0.75, 1.0, 1.25, 1.5)
-        verticalSeparation = 1.0       # (0, 0.25, 0.5, 0.75, 1.0)
+with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
+    with SyncCrazyflie(URIS[1], cf=Crazyflie(rw_cache='./cache')) as scf2:
+        
+        horizontalSeparation = 1.5      # (0.25, 0.5, 0.75, 1.0, 1.25, 1.5)
+        verticalSeparation = 0          # (0, 0.25, 0.5, 0.75, 1.0)
         speed = 0.2                     # (0.2, 0.4, 0.6, 0.8, 1.0)
+        extraHeight = [verticalSeparation, 0]
 
-        # If the current drone is the leading drone,
-        # gives it an extra height for vertical separation.
-        # Also, adds delay to the trailing drone
-        # to allow the first drone to stabilise
-        # before the second drone takes off and lands.
-        if (uri == URIS[0]):
-            extraHeight = verticalSeparation
-            extraDelay = 0
-        else:
-            extraHeight = 0
-            extraDelay = 5.0
+        referenceTime = time.time()
+        takeOffTime = [time.time(), time.time() + 5.0]
+        movementTime = takeOffTime[1] + 10.0
 
-        # Waits until the start time.
-        waitTime = START_TIME + extraDelay - time.time()
-        while (waitTime > 0):
-            time.sleep(waitTime)
+        # Launch each Crazyflie in its own thread
+        threads = []
+        scf = [scf1, scf2]
 
-        # Runs the trial with the proper parameters.
-        RunOneTrial(scf, LOG_FOLDER, TRIAL_DISTANCE, speed, horizontalSeparation, extraHeight)
-                
-# Launch each Crazyflie in its own thread
-threads = []
+        # Creates a thread for each drone. 
+        for i in range(len(URIS)):
+            t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, TRIAL_DISTANCE, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime))
+            # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
+            t.start()
+            threads.append(t)
 
-# Creates a thread for each drone. 
-for uri in URIS:
-    t = threading.Thread(target=main, args=(uri,))
-    t.start()
-    threads.append(t)
-
-# Waits for all threads to complete.
-for t in threads:
-    t.join()
+        # Waits for all threads to complete.
+        for t in threads:
+            t.join()

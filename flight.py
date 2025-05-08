@@ -31,7 +31,11 @@ def DetectDeck(scf) -> None:
     else:
         print("Deck attached.")
 
-def DiagnosticFlight(scf):
+def DiagnosticFlightSimple(scf) -> None:
+    with MotionCommander(scf, default_height=DEFAULT_HEIGHT) as mc:
+        time.sleep(DEFAULT_DELAY)
+
+def DiagnosticFlight(scf) -> None:
     """Does a simple test flight to confirm the drone is fully operational.
     """
 
@@ -51,7 +55,7 @@ def DiagnosticFlight(scf):
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float, startTime: float) -> None:
+def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float, takeOffTime: float, movementTime: float) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -73,9 +77,16 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
             Only given to this function to pass forward to the log file upon creation.
         verticalSeparation: float
             The height above DEFAULT_HEIGHT to take off to.
-        startTime: float
+        takeOffTime: float
+            The time to wait until before taking off.
+        movementTime: float
             The time to wait until before starting to move.
     """
+
+    # Waits until the take off time to take off.
+    while ((waitTime := takeOffTime - time.time()) > 0):
+        print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before taking off.")
+        time.sleep(waitTime)
 
     # Takes off with motion commander to the desired height.
     with MotionCommander(scf, default_height=DEFAULT_HEIGHT + verticalSeparation) as mc:
@@ -83,14 +94,14 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         time.sleep(DEFAULT_DELAY)
 
         # Creates the required log file.
-        CreateLogFile(logFolder, distance, speed, horizontalSeparation, verticalSeparation)
+        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, verticalSeparation)
 
         # Starts logging.
         log = StartLogging(scf, logFile)
 
-        # Waits until the start time to start flying.
-        waitTime = startTime - time.time()
-        while (waitTime > 0):
+        # Waits until the start time to start moving.
+        while ((waitTime := movementTime - time.time()) > 0):
+            print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
             time.sleep(waitTime)
         
         # Moves to the end of the trial.

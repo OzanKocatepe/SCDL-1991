@@ -106,7 +106,7 @@ def LogCallback(uri, timestamp, data, logFile: str):
     file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
     file.close()
 
-def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float):
+def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, verticalSeparation: float) -> str:
     """Creates the log file for a specific trial.
 
     Parameters:
@@ -120,6 +120,9 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
             The horizontal separation between the drones, in m.
         verticalSeparation.
             The vertical separation between the drones, in m.
+
+    Returns:
+        The path to the newly created log file.
     """
 
     # Determines how many files have already been created today
@@ -146,3 +149,5 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
     file.write(f"verticalSeparation: {verticalSeparation}\n")
     file.write("==========================================\n")
     file.close()
+
+    return logFile

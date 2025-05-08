@@ -1,0 +1,9 @@
+timestamp,uri,x,y,z,vx,vy,vz,battery
+==========================================
+date: 2025-05-08
+time: 13:22:55
+distance: 1.0
+velocity: 0.2
+horizontalSeparation: 1.5
+verticalSeparation: 0
+==========================================
