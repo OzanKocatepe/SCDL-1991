@@ -14,7 +14,7 @@ from cflib.crazyflie.log import LogConfig
 uris = [
     'radio://0/80/2M/E7E7E7E7E4',
     'radio://1/60/2M/E7E7E7E7E6',
-    # 'radio://0/80/2M/E7E7E7E7E8'
+    'radio://0/80/2M/E7E7E7E7E8'
 ]
 
 # Only output errors.
@@ -28,7 +28,8 @@ if __name__ == "__main__":
         # Sets continuous to true in the logging function.
         args = {
             uris[0]: (True,),
-            uris[1]: (True,)
+            uris[1]: (True,),
+            uris[2]: (True,)
         }
 
         # Starts loggings battery levels.

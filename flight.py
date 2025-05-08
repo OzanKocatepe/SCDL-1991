@@ -4,6 +4,7 @@ from cflib.positioning.motion_commander import MotionCommander
 from logs import *
 
 DEFAULT_HEIGHT = 0.5
+DEFAULT_TIME = 2.0
 DEFAULT_DELAY = 5.0
 
 """Stores the functions related to movement of the drone.
@@ -124,3 +125,24 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
 
         # Stops logging.
         log.stop()
+
+    # # Takes off.
+    # for i in range(int(DEFAULT_TIME * 10)):
+    #     scf.cf.commander.send_full_state_setpoint([startPos[0], startPos[1], DEFAULT_HEIGHT], [0, 0, speed / DEFAULT_TIME])
+    #     time.sleep(0.1)
+    
+    #     # Pauses after taking off to stabilise.
+    #     time.sleep(DEFAULT_DELAY)
+
+    #     # Creates the required log file.
+    #     logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+
+    #     # Starts logging.
+    #     log = StartLogging(scf, logFile)
+
+    #     # Waits until the start time to start moving.
+    #     while ((waitTime := movementTime - time.time()) > 0):
+    #         print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
+    #         time.sleep(waitTime)
+
+    #     # Starts moving.
