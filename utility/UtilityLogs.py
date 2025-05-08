@@ -20,7 +20,7 @@ Methods:
         Prints any battery data to the console.
 """
 
-def StartLoggingBattery(scf):
+def StartLoggingBattery(scf, continuous=False):
     """Tells the Crazyflie to start logging battery levels.
 
     Creates the desired log config and callback function and
@@ -28,7 +28,11 @@ def StartLoggingBattery(scf):
     """
 
     # Creates the config.
-    config = LogConfig(name="Battery", period_in_ms=500)
+    if (continuous):
+        interval = 2000
+    else:
+        interval = 500
+    config = LogConfig(name="Battery", period_in_ms=interval)
 
     # Adds the battery as a voltage.
     config.add_variable('pm.vbat', 'float')
@@ -37,10 +41,10 @@ def StartLoggingBattery(scf):
     scf.cf.log.add_config(config)
 
     # Adds the callback functions and starts logging.
-    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: BatteryCallback(scf.cf.link_uri, data))
+    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: BatteryCallback(scf.cf.link_uri, data, config, continuous))
     config.start()
 
-def BatteryCallback(uri, data):
+def BatteryCallback(uri, data, config, continuous=False):
     """Outputs the battery data to the console.
 
     This function is called every time a packet containing battery
@@ -48,3 +52,7 @@ def BatteryCallback(uri, data):
     """
 
     print(f'{uri},{data["pm.vbat"]}')
+    
+    if (data["pm.vbat"] > 4.0 and continuous):
+            config.stop()
+            print(f"{uri} finished charging.")

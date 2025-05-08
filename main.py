@@ -31,6 +31,12 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # Stores the scf references.
         scf = [scf1, scf2]
 
+        for s in scf:
+            s.cf.param.set_value('kalman.resetEstimation', '1')
+            time.sleep(0.1)
+            s.cf.param.set_value('kalman.resetEstimation', '0')
+            time.sleep(2)
+
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
         extraHeight = [0.75, 0]      # (0.75, 0.5, 0.25, 0)
