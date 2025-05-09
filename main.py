@@ -59,8 +59,7 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
 
         # Creates a thread for each drone. 
         for i in range(len(URIS)):
-            # t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
-            t = threading.Thread(target=SimpleFlightWithCommander, args=(scf[i], initialX[i]))
+            t = threading.Thread(target=RunOneTrial, args=(scf[i], initialX[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
             t.start()
             threads.append(t)

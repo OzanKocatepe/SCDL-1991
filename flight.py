@@ -62,7 +62,7 @@ def DiagnosticFlight(scf) -> None:
         time.sleep(DEFAULT_DELAY)
 
 
-def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, takeOffTime: float, movementTime: float, repetition: int) -> None:
+def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, takeOffTime: float, movementTime: float, repetition: int) -> None:
     """Runs a single trial with the given parameters.
 
     A single trial consists of taking off, beginning logging,
@@ -104,6 +104,11 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         # Pauses after taking off to stabilise.
         time.sleep(DEFAULT_DELAY)
 
+        # Tells it to go to the required position.
+        scf.cf.high_level_commander.go_to(initialX, 0, DEFAULT_HEIGHT, 0, 5.0)
+        print("Going to...")
+        time.sleep(5.0)
+
         # Creates the required log file.
         logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
 
@@ -116,8 +121,8 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
             time.sleep(waitTime)
         
         # Moves to the end of the trial.
-        mc.forward(distance, velocity=speed)
-        time.sleep(DEFAULT_DELAY)
+        # mc.forward(distance, velocity=speed)
+        # time.sleep(DEFAULT_DELAY)
 
         # Moves back to the beginning.
         # mc.back(distance, velocity=0.2)
@@ -125,19 +130,3 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
 
         # Stops logging.
         log.stop()
-
-def SimpleFlightWithCommander(scf, initialX):
-    commander = scf.cf.commander
-    flight_time = 5.0
-
-    flight_time = int(10 * flight_time)
-
-    for i in range(flight_time):
-        commander.send_position_setpoint(initialX, 0, DEFAULT_HEIGHT, 0)
-        time.sleep(0.1)
-    
-    time.sleep(5.0)
-
-    for i in range(flight_time):
-        commander.send_position_setpoint(initialX, 0, 0, 0)
-        time.sleep(0.1)
