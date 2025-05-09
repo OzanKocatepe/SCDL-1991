@@ -41,3 +41,5 @@ Friday:
 
     - Got a working motor from one of the unusable bases and gave it to E4 to fix its failing motor - re-estimated its geometry and gave it a test flight, didn't crash after passing and coming back from the height threshold, and seem to fly well. Both drones also now no longer drop out of the sky when landing, which probably is due to their proper geometry so they know how close they really are to the ground. Quite nice.
     Both drones fly very stable even at higher altitudes, so the trials might actually work out. (2:32 PM)
+    
+    - Been running trials, was able to get 1 more trial, but the drones still drift enough on take off and during the flight that they're no longer aligned in the air, so the trial ends up not testing the separation we actually want. So I really need to figure out the drifting. Clearly its not the motors or the base stations, since those have been changed, and its not the height since the same thing happens at lower heights. (3:02 PM)

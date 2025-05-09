@@ -42,22 +42,25 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
 
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
-        extraHeight = [0.75, 0]      # (0.75, 0.5, 0.25, 0)
+        extraHeight = [0.25, 0]      # (0.75, 0.5, 0.25, 0)
         speed = 0.5                 # (0.5, 0.75, 1.0)
         distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
-        repetition = 2              # (0, 1, 2)
+        repetition = 0              # (0, 1, 2)
 
         # Sets the times for take off and movement.
         referenceTime = time.time()
-        takeOffTime = [referenceTime, referenceTime + 5.0]
-        movementTime = takeOffTime[1] + 10.0
+        takeOffTime = [referenceTime, referenceTime]
+        movementTime = takeOffTime[1] + 7.0
+
+        initialX = [-0.5, -1.5]
 
         # Launch each Crazyflie in its own thread
         threads = []
 
         # Creates a thread for each drone. 
         for i in range(len(URIS)):
-            t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
+            # t = threading.Thread(target=RunOneTrial, args=(scf[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
+            t = threading.Thread(target=SimpleFlightWithCommander, args=(scf[i], initialX[i]))
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
             t.start()
             threads.append(t)

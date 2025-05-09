@@ -126,23 +126,18 @@ def RunOneTrial(scf, logFolder: str, distance: float, speed: float, horizontalSe
         # Stops logging.
         log.stop()
 
-    # # Takes off.
-    # for i in range(int(DEFAULT_TIME * 10)):
-    #     scf.cf.commander.send_full_state_setpoint([startPos[0], startPos[1], DEFAULT_HEIGHT], [0, 0, speed / DEFAULT_TIME])
-    #     time.sleep(0.1)
+def SimpleFlightWithCommander(scf, initialX):
+    commander = scf.cf.commander
+    flight_time = 5.0
+
+    flight_time = int(10 * flight_time)
+
+    for i in range(flight_time):
+        commander.send_position_setpoint(initialX, 0, DEFAULT_HEIGHT, 0)
+        time.sleep(0.1)
     
-    #     # Pauses after taking off to stabilise.
-    #     time.sleep(DEFAULT_DELAY)
+    time.sleep(5.0)
 
-    #     # Creates the required log file.
-    #     logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
-
-    #     # Starts logging.
-    #     log = StartLogging(scf, logFile)
-
-    #     # Waits until the start time to start moving.
-    #     while ((waitTime := movementTime - time.time()) > 0):
-    #         print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
-    #         time.sleep(waitTime)
-
-    #     # Starts moving.
+    for i in range(flight_time):
+        commander.send_position_setpoint(initialX, 0, 0, 0)
+        time.sleep(0.1)
