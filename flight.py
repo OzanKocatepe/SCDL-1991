@@ -119,11 +119,11 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         
         # Moves to the end of the trial.
         commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, velocity=speed)
-        time.sleep(distance / speed + DEFAULT_DELAY)
+        time.sleep(distance / speed + 2.0)
 
         # Stops logging.
         log.stop()
 
         # Moves back to the beginning.
         commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, velocity=0.5)
-        time.sleep(distance / 0.5 + DEFAULT_DELAY)
+        time.sleep(distance / 0.5 + 2.0)
