@@ -52,6 +52,10 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         takeOffTime = [referenceTime, referenceTime]
         movementTime = takeOffTime[1] + 7.0
 
+        # Stores the initial X coordinate of the drones.
+        # Lighthouse and PositionHlCommander probably use different coordinate spaces, so I
+        # probably don't actually need these, but its nice to keep the two coordinate systems
+        # aligned.
         initialX = [-0.5, -1.5]
 
         # Launch each Crazyflie in its own thread
