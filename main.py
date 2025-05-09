@@ -16,7 +16,7 @@ TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m
 
 # Gets URI
 URIS = [
-    "radio://0/60/2M/E7E7E7E7E6", # LEADING DRONE
+    "radio://0/60/2M/E7E7E7E7E8", # LEADING DRONE
     "radio://1/80/2M/E7E7E7E7E4"  # TRAILING DRONE
 ]
 
