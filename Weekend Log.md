@@ -49,3 +49,5 @@ Friday:
     - PositionHlCommander seems to be significantly more stable than motion commander. Going to rewrite the code to use this class instead. (3:42 PM)
 
     - PositionHlCommander *is* significantly more stable, enough that I can probably automate the tests in small bunches. One of the drones crashed so I need to make sure that's just because of low battery or a freak glitch, but this is very good news. Not only can I actually perform the trials easily, I can also automate them, at least to an extent.
+
+    - Well, the behind drone keeps becoming unstable and crashing, and I'm not sure why. Even when it does work, the back drone seems to speed up faster than the front drone, so I feel like the horizontal distance is inaccurate. I don't know whats happening. Might just need to re-estimate geometry or re-position them relative to the base stations? I need to double check that they're actually the proper distance apart in the air. Very frustrating, after fixing the new problems that showed up and seemingly making progress on the stability of the drones, I've now come to the end having made almost no progress on getting trials running. (4:31 PM)
