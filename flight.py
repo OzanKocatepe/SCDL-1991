@@ -1,6 +1,7 @@
 import sys
 
 from cflib.positioning.motion_commander import MotionCommander
+from cflib.positioning.position_hl_commander import PositionHlCommander
 from logs import *
 
 DEFAULT_HEIGHT = 0.5
@@ -100,14 +101,10 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         time.sleep(waitTime)
 
     # Takes off with motion commander to the desired height.
-    with MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight) as mc:
+    # with MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight) as mc:
+    with PositionHlCommander(scf, x=initialX, y=0, z=0, default_height=DEFAULT_HEIGHT + extraHeight) as commander:
         # Pauses after taking off to stabilise.
         time.sleep(DEFAULT_DELAY)
-
-        # Tells it to go to the required position.
-        scf.cf.high_level_commander.go_to(initialX, 0, DEFAULT_HEIGHT, 0, 5.0)
-        print("Going to...")
-        time.sleep(5.0)
 
         # Creates the required log file.
         logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
@@ -121,12 +118,14 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
             time.sleep(waitTime)
         
         # Moves to the end of the trial.
+        commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, velocity=speed)
+        time.sleep(distance / speed + DEFAULT_DELAY)
         # mc.forward(distance, velocity=speed)
-        # time.sleep(DEFAULT_DELAY)
-
-        # Moves back to the beginning.
-        # mc.back(distance, velocity=0.2)
         # time.sleep(DEFAULT_DELAY)
 
         # Stops logging.
         log.stop()
+
+        # Moves back to the beginning.
+        commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, velocity=0.5)
+        time.sleep(distance / 0.5 + DEFAULT_DELAY)

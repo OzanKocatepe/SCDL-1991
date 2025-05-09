@@ -43,3 +43,9 @@ Friday:
     Both drones fly very stable even at higher altitudes, so the trials might actually work out. (2:32 PM)
     
     - Been running trials, was able to get 1 more trial, but the drones still drift enough on take off and during the flight that they're no longer aligned in the air, so the trial ends up not testing the separation we actually want. So I really need to figure out the drifting. Clearly its not the motors or the base stations, since those have been changed, and its not the height since the same thing happens at lower heights. (3:02 PM)
+
+    - Tried using the high_level_commander, but the Crazyflies just don't move when I tell them to. Going to go through the other classes used for movement and see if I can find one that can help me solve this.
+
+    - PositionHlCommander seems to be significantly more stable than motion commander. Going to rewrite the code to use this class instead. (3:42 PM)
+
+    - PositionHlCommander *is* significantly more stable, enough that I can probably automate the tests in small bunches. One of the drones crashed so I need to make sure that's just because of low battery or a freak glitch, but this is very good news. Not only can I actually perform the trials easily, I can also automate them, at least to an extent.
