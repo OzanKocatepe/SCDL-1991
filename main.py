@@ -11,7 +11,7 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.utils import uri_helper
 
 # Constants.
-LOG_FOLDER = "./testlogs"
+LOG_FOLDER = "./logs"
 TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m away from the trailing drone.
 
 # Gets URI
@@ -30,9 +30,6 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
     with SyncCrazyflie(URIS[1], cf=Crazyflie(rw_cache='./cache')) as scf2:
         # Stores the scf references.
         scf = [scf1, scf2]
-        
-        # Manually sets the start pos.
-        startPos = [ [-0.31, 0, 0.12], [-1.47, 0.01, -0.09] ]
 
         for s in scf:
             # Resets the estimators.
@@ -44,9 +41,9 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
         extraHeight = [0.25, 0]      # (0.75, 0.5, 0.25, 0)
-        speed = 0.5                 # (0.5, 0.75, 1.0)
+        speed = 1.0                  # (0.5, 0.75, 1.0)
         distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
-        repetition = 0              # (0, 1, 2)
+        repetition = 2              # (0, 1, 2)
 
         # Stores the initial X coordinate of the drones.
         # Lighthouse and PositionHlCommander probably use different coordinate spaces, so I

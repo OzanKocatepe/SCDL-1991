@@ -61,6 +61,8 @@ def StartLogging(scf, logFile: str) -> LogConfig:
 
     # Adds the battery as a voltage.
     config.add_variable('pm.vbat', 'float')
+    # Adds the battery as a percentage.
+    config.add_variable('pm.batteryLevel', 'FP16')
 
     # Adds the configs to the crazyflie.
     scf.cf.log.add_config(config)
@@ -103,7 +105,7 @@ def LogCallback(uri, timestamp, data, logFile: str) -> None:
     file = open(logFile, "a")
 
     # Writes to the file in csv form and then closes it.
-    file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]}\n')
+    file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]},{data["pm.batteryLevel"]}\n')
     file.close()
 
 def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, repetition: int) -> str:
@@ -141,7 +143,7 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
     # above breaks and we write to a file that already exists, we don't
     # lose the data stored within that file.
     file = open(logFile, 'a')
-    file.write("timestamp,uri,x,y,z,vx,vy,vz,battery\n")
+    file.write("timestamp,uri,x,y,z,vx,vy,vz,batteryV,battery%\n")
     file.write("==========================================\n")
     file.write(f"date: {str(datetime.date.today())}\n")
     file.write(f"time: {str(datetime.datetime.now().strftime('%H:%M:%S'))}\n")

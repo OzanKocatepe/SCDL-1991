@@ -36,6 +36,8 @@ def StartLoggingBattery(scf, continuous=False):
 
     # Adds the battery as a voltage.
     config.add_variable('pm.vbat', 'float')
+    # Adds the battery as a percentage.
+    config.add_variable('pm.batteryLevel', 'float')
 
     # Adds the configs to the crazyflie.
     scf.cf.log.add_config(config)
@@ -51,7 +53,7 @@ def BatteryCallback(uri, data, config, continuous=False):
     data is received from the Crazyflie. It outputs the data to the console.
     """
 
-    print(f'{uri},{data["pm.vbat"]}')
+    print(f'{uri},{data["pm.vbat"]},{data["pm.batteryLevel"]}')
     
     if (data["pm.vbat"] > 4.0 and continuous):
             config.stop()
