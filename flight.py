@@ -131,7 +131,6 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     while ((waitTime := movementTime - time.time()) > 0):
         print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
         commander.send_position_setpoint(initialX, 0, height, 0)
-        # commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
         time.sleep(0.1)
 
     # Moves forward the desired distance at the desired speed.
