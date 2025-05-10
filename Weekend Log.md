@@ -55,4 +55,4 @@ Friday:
 Saturday:
     - Showed up, drones seem to have no issues. Last night I had a hunch that maybe the back drone crashed only because I picked it up in between trials. This seems to have been true. If I don't pick it up it works perfectly, except for landing about 10cm away from where it should. Will have to test that.
         - Should swap drones to see if the problem is with the drone or the position.
-        - Back drone also speeds up faster than front -- currently checking if thats due to different battery levels.
+        - Back drone also speeds up faster than front -- currently checking if thats due to different battery levels. (3:12 PM)
