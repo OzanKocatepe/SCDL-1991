@@ -16,8 +16,8 @@ TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m
 
 # Gets URI
 URIS = [
-    "radio://0/60/2M/E7E7E7E7E8", # LEADING DRONE
-    "radio://1/80/2M/E7E7E7E7E4"  # TRAILING DRONE
+    "radio://1/80/2M/E7E7E7E7E4", # LEADING DRONE
+    "radio://0/60/2M/E7E7E7E7E8"  # TRAILING DRONE
 ]
 
 # Only logs errors.
@@ -43,9 +43,9 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
         extraHeight = [0.25, 0]      # (0.75, 0.5, 0.25, 0)
-        speed = 0.5                 # (0.5, 0.75, 1.0)
+        speed = 1.0                 # (0.5, 0.75, 1.0)
         distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
-        # repetition = 0              # (0, 1, 2)
+        repetition = -1              # (0, 1, 2)
 
         # Stores the initial X coordinate of the drones.
         # Lighthouse and PositionHlCommander probably use different coordinate spaces, so I
@@ -53,24 +53,24 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # aligned.
         initialX = [-0.5, -1.5]
 
-        for repetition in range(3):
-            # Sets the times for take off and movement.
-            referenceTime = time.time()
-            takeOffTime = [referenceTime, referenceTime]
-            movementTime = takeOffTime[1] + 7.0
+        # for repetition in range(3):
+        # Sets the times for take off and movement.
+        referenceTime = time.time()
+        takeOffTime = [referenceTime, referenceTime]
+        movementTime = takeOffTime[1] + 10.0
 
-            # Launch each Crazyflie in its own thread
-            threads = []
+        # Launch each Crazyflie in its own thread
+        threads = []
 
-            # Creates a thread for each drone. 
-            for i in range(len(URIS)):
-                t = threading.Thread(target=RunOneTrial, args=(scf[i], initialX[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
-                # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
-                t.start()
-                threads.append(t)
+        # Creates a thread for each drone. 
+        for i in range(len(URIS)):
+            t = threading.Thread(target=RunOneTrial, args=(scf[i], initialX[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
+            # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
+            t.start()
+            threads.append(t)
 
-            # Waits for all threads to complete.
-            for t in threads:
-                t.join()
+        # Waits for all threads to complete.
+        for t in threads:
+            t.join()
 
-            input()
+        # input("Continue?")

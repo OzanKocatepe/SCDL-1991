@@ -56,3 +56,7 @@ Saturday:
     - Showed up, drones seem to have no issues. Last night I had a hunch that maybe the back drone crashed only because I picked it up in between trials. This seems to have been true. If I don't pick it up it works perfectly, except for landing about 10cm away from where it should. Will have to test that.
         - Should swap drones to see if the problem is with the drone or the position.
         - Back drone also speeds up faster than front -- currently checking if thats due to different battery levels. (3:12 PM)
+
+    - When I swap the positions of the drones, the back drone no longer drifts out of place so far, which is useful. However, for accuracy I should probably do each trial manually anyways. However, the back drone still speeds up faster than the front drone. Need to check my code. (3:41 PM)
+
+    - I think the back drone speeding up faster was due to me not giving them enough delay before starting to move, so by the time they were ready to move they were past the movementTime and didn't wait together at all, which means the delay between the threads caused the drones to move about half a second out of sync. (3:52 PM)
