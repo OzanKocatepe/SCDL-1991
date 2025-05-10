@@ -74,3 +74,5 @@ Saturday:
     - Okay I found a logic error in my code so the forward movement was actually running the command for hovering, and in fact the logic for moving forward with a certain velocity was being skipped entirely. I do believe the velocity setpoint was actually not working or something, but I swear I didn't change the logic when changing that function so maybe it was never being called and the downwards drift was just chance? Idk. (7:32 PM)
 
     - Just realised I was probably skipping immediately to landing with no hovering, so the drone would move forward and down since it hadn't actually reached the end of the trial then. Once the hovering was added it would just move forward rather than moving down. And of course this was at 1.0 m/s, its max speed. (7:34 PM)
+
+    - IT WORKS. The positions and velocities seem accurate, the drift seems minimal, and the loggs seem to cover all of the movement and accurately report all of the desired values. Yippee!!
