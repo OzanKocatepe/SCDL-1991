@@ -64,3 +64,9 @@ Saturday:
     - PositionHlCommander position estimates seemingly aren't accurate enough to actually automate trials. Syncing the drones fixed the issue which was stopping me from manually doing individual trials, but now we have a new issue: the velocity setting seemingly isn't actually doing anything? I mean visually it seems like it is, but the log files just show that its always ramping up to ~1.1 m/s in the x-axis and then back down again. Gonna try out some more commands to see if any fix this. Might need another class, which could also have better positioning. (4:03 PM)
 
     - Rewrote the flight code using high level commander (which probably won't work). Also going to test if setting the maximum Crazyflie velocity to a lower value will work for flying with lower velocities so the velocity doesn't go too high.
+
+    - Tried high_level_commander but it has the same velocity issue. If its stable (unlike using swarm) and able to automate trials I may swap to it over PositionHlCommander (since thats just a wrapper for this anyways), but who knows. (5:09 PM)
+
+    - Okay chatgpt lied to me so setting the max velocity lower is a no-go. Might have to just use the actual commander interface. (5:18 PM)
+
+    - Haven't updated in a while, have decided that it doesn't seem possible (or at least not easy) to combine the PosiitonHlCommander and MotionCommander classes to take advantage of both, but since they both at the lowest level use the commander, I've been trying to figure out how to use the commander and imitate what these classes do. This has required looking at the MotionCommander source code at some points :(. As of right now, the commander is working *except* for during the forward movement, where, despite using a function specifically designed for this, the drones are still drifting significantly downwards. Also need to add logging back in to test the velocity. (6:51 PM)

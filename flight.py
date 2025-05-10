@@ -96,42 +96,94 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
             log file header.
     """
 
+    height = DEFAULT_HEIGHT + extraHeight
+
     # Waits until the take off time to take off.
     while ((waitTime := takeOffTime - time.time()) > 0):
         print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before taking off.")
         time.sleep(waitTime)
 
     # Takes off with motion commander to the desired height.
-    # with MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight) as mc:
+    # mc = MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight)
+    # pc = PositionHlCommander(scf, x=initialX, y=0, z=0, default_height=DEFAULT_HEIGHT + extraHeight)
     # with PositionHlCommander(scf, x=initialX, y=0, z=0, default_height=DEFAULT_HEIGHT + extraHeight) as commander:
-    commander = HighLevelCommander(scf)
+    commander = scf.cf.commander
 
-    commander.takeoff(DEFAULT_HEIGHT + extraHeight, 3.0)
+    # pc.take_off(height=DEFAULT_HEIGHT + extraHeight, velocity=0.5)
+
+    print(f"{scf.cf.link_uri} taking off...")
+    steps = 30
+    for i in range(1, steps + 1):
+        currentHeight = height * (i / steps)
+        commander.send_position_setpoint(initialX, 0, currentHeight, 0)
+        time.sleep(0.1)
+
+    # commander.takeoff(DEFAULT_HEIGHT + extraHeight, 3.0)
+    # print("debug1") for y in range(int(3.0 * 10)):
+    #     commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
+    #     time.sleep(0.1)
 
     # Pauses after taking off to stabilise.
-    time.sleep(DEFAULT_DELAY)
+    # time.sleep(DEFAULT_DELAY)
 
-    # Creates the required log file.
-    logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+    print(f"{scf.cf.link_uri} hovering...")
+    for y in range(50):
+        commander.send_position_setpoint(initialX, 0, height, 0)
+        time.sleep(0.1)
 
-    # Starts logging.
-    log = StartLogging(scf, logFile)
+    # # Creates the required log file.
+    # logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+
+    # # Starts logging.
+    # log = StartLogging(scf, logFile)
         
     # Waits until the start time to start moving.
     while ((waitTime := movementTime - time.time()) > 0):
         print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
-        time.sleep(waitTime)
+        commander.send_position_setpoint(initialX, 0, height, 0)
+        # commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
+        time.sleep(0.1)
+
+    flightTime = speed / distance
+    while ((waitTime := flightTime - time.time()) > 0):
+        commander.send_hover_setpoint(speed, 0, 0, height)
+        time.sleep(0.1)
         
     # Moves to the end of the trial.
-    commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, yaw=0, duration_s = distance / speed)
+    # print("debug2")
+    # for y in range(int(speed / distance * 10)):
+    #     commander.send_velocity_world_setpoint(speed, 0, 0, 0)
+    #     time.sleep(0.1)
+    # mc.forward(distance, velocity=speed)
+    # commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, yaw=0, duration_s = distance / speed)
     # commander.move_distance(distance, 0, 0, velocity=speed)
-    time.sleep(distance / speed + 2.0)
+    # time.sleep(distance / speed + 2.0)
+    # time.sleep(DEFAULT_DELAY)
 
     # Stops logging.
-    log.stop()
+    # log.stop()
+
+    # Lands
+    # print("debug3")
+    # for y in range(int(3.0 * 10)):
+    #     commander.send_position_setpoint(initialX + distance, 0, 0, 0)
+    #     time.sleep(0.1)
 
     # Moves back to the beginning.
-    # commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, velocity=0.5)
-    # time.sleep(distance / 0.5 + 2.0)
+    # commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, yaw=0, duration_s = distance / 0.2)
+    # time.sleep(distance / 0.2 + 2.0)
 
-    commander.land(0, 3.0)
+    movementTime = time.time() + 5.0
+    while ((waitTime := movementTime - time.time()) > 0):
+        commander.send_position_setpoint(initialX, 0, height, 0)
+        # commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
+        time.sleep(0.1)
+
+    steps = 30
+    for i in range(steps, 0, -1):
+        currentHeight = height * (i / steps)
+        commander.send_position_setpoint(initialX + distance, 0, currentHeight, 0)
+        time.sleep(0.15) 
+
+    # pc.land(velocity=0.5)
+    # commander.land(0, 3.0)
