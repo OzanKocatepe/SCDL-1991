@@ -62,3 +62,5 @@ Saturday:
     - I think the back drone speeding up faster was due to me not giving them enough delay before starting to move, so by the time they were ready to move they were past the movementTime and didn't wait together at all, which means the delay between the threads caused the drones to move about half a second out of sync. (3:52 PM)
 
     - PositionHlCommander position estimates seemingly aren't accurate enough to actually automate trials. Syncing the drones fixed the issue which was stopping me from manually doing individual trials, but now we have a new issue: the velocity setting seemingly isn't actually doing anything? I mean visually it seems like it is, but the log files just show that its always ramping up to ~1.1 m/s in the x-axis and then back down again. Gonna try out some more commands to see if any fix this. Might need another class, which could also have better positioning. (4:03 PM)
+
+    - Rewrote the flight code using high level commander (which probably won't work). Also going to test if setting the maximum Crazyflie velocity to a lower value will work for flying with lower velocities so the velocity doesn't go too high.
