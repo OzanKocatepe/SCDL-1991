@@ -65,7 +65,7 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
             t.start()
             threads.append(t)
-            time.sleep(0.1)
+            time.sleep(1.0)
 
         # Waits for all threads to complete.
         for t in threads:
