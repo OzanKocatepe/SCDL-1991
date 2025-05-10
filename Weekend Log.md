@@ -76,3 +76,5 @@ Saturday:
     - Just realised I was probably skipping immediately to landing with no hovering, so the drone would move forward and down since it hadn't actually reached the end of the trial then. Once the hovering was added it would just move forward rather than moving down. And of course this was at 1.0 m/s, its max speed. (7:34 PM)
 
     - IT WORKS. The positions and velocities seem accurate, the drift seems minimal, and the loggs seem to cover all of the movement and accurately report all of the desired values. Yippee!!
+
+    - Got some trial data. Might need to redo it due to the battery levels, and might want to increase the distance. However, it works! (as well as it ever will). (8:58 PM)
