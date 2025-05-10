@@ -2,6 +2,7 @@ import sys
 
 from cflib.positioning.motion_commander import MotionCommander
 from cflib.positioning.position_hl_commander import PositionHlCommander
+from cflib.crazyflie.high_level_commander import HighLevelCommander
 from logs import *
 
 DEFAULT_HEIGHT = 0.5
@@ -102,29 +103,35 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
 
     # Takes off with motion commander to the desired height.
     # with MotionCommander(scf, default_height=DEFAULT_HEIGHT + extraHeight) as mc:
-    with PositionHlCommander(scf, x=initialX, y=0, z=0, default_height=DEFAULT_HEIGHT + extraHeight) as commander:
-        # Pauses after taking off to stabilise.
-        time.sleep(DEFAULT_DELAY)
+    # with PositionHlCommander(scf, x=initialX, y=0, z=0, default_height=DEFAULT_HEIGHT + extraHeight) as commander:
+    commander = HighLevelCommander(scf)
 
-        # Creates the required log file.
-        logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+    commander.takeoff(DEFAULT_HEIGHT + extraHeight, 3.0)
 
-        # Starts logging.
-        log = StartLogging(scf, logFile)
+    # Pauses after taking off to stabilise.
+    time.sleep(DEFAULT_DELAY)
 
-        # Waits until the start time to start moving.
-        while ((waitTime := movementTime - time.time()) > 0):
-            print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
-            time.sleep(waitTime)
+    # Creates the required log file.
+    logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+
+    # Starts logging.
+    log = StartLogging(scf, logFile)
         
-        # Moves to the end of the trial.
-        commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, velocity=speed)
-        time.sleep(distance / speed + 0.5)
+    # Waits until the start time to start moving.
+    while ((waitTime := movementTime - time.time()) > 0):
+        print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
+        time.sleep(waitTime)
+        
+    # Moves to the end of the trial.
+    commander.go_to(initialX + distance, 0, DEFAULT_HEIGHT + extraHeight, yaw=0, duration_s = distance / speed)
+    # commander.move_distance(distance, 0, 0, velocity=speed)
+    time.sleep(distance / speed + 2.0)
 
-        # Stops logging.
-        log.stop()
-        time.sleep(1.5)
+    # Stops logging.
+    log.stop()
 
-        # Moves back to the beginning.
-        commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, velocity=0.5)
-        time.sleep(distance / 0.5 + 2.0)
+    # Moves back to the beginning.
+    # commander.go_to(initialX, 0, DEFAULT_HEIGHT + extraHeight, velocity=0.5)
+    # time.sleep(distance / 0.5 + 2.0)
+
+    commander.land(0, 3.0)
