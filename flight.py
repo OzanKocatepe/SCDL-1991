@@ -108,7 +108,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     commander = scf.cf.commander
 
     # Takes off to the desired height.
-    print(f"{scf.cf.link_uri} taking off...")
+    print(f"{scf.cf.link_uri} taking off at {time.time()}...")
     steps = 30
     for i in range(1, steps + 1):
         currentHeight = height * (i / steps)
@@ -116,8 +116,14 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         time.sleep(0.1)
 
     # Hovers in place to stabilise.
-    print(f"{scf.cf.link_uri} hovering...")
+    print(f"{scf.cf.link_uri} hovering at {time.time()}...")
     for y in range(50):
+        commander.send_position_setpoint(initialX, 0, height, 0)
+        time.sleep(0.1)
+
+    print(f"{scf.cf.link_uri} waiting to move at {time.time()}...")
+    # Hovers in place until the movement time.
+    while ((waitTime := movementTime - time.time()) > 0):
         commander.send_position_setpoint(initialX, 0, height, 0)
         time.sleep(0.1)
 
@@ -126,16 +132,12 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
 
     # Starts logging.
     log = StartLogging(scf, logFile)
-        
-    # Hovers in place until the movement time.
-    while ((waitTime := movementTime - time.time()) > 0):
-        print(f"{scf.cf.link_uri} sleeping for {waitTime} seconds before moving.")
-        commander.send_position_setpoint(initialX, 0, height, 0)
-        time.sleep(0.1)
 
+    print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
     # Moves forward the desired distance at the desired speed.
-    flightTime = speed / distance
+    flightTime = time.time() + (distance / speed)
     while ((waitTime := flightTime - time.time()) > 0):
+        print(f"{scf.cf.link_uri} currently flying.")
         commander.send_hover_setpoint(speed, 0, 0, height)
         time.sleep(0.1)        
 
@@ -143,15 +145,24 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     log.stop()
 
     # Hovers for 5 seconds at the desired position.
+    print(f"{scf.cf.link_uri} hovering at time {time.time()}...")
     hoverTime = time.time() + 5.0
     while ((waitTime := hoverTime - time.time()) > 0):
-        commander.send_position_setpoint(initialX, 0, height, 0)
+        commander.send_position_setpoint(initialX + distance, 0, height, 0)
         # commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
         time.sleep(0.1)
 
+    # Moves back to the beginning.
+    print(f"{scf.cf.link_uri} moving back to beginning at {time.time()}...")
+    flightTime = time.time() + (distance / 1.0)
+    while ((waitTime := flightTime - time.time()) > 0):
+        commander.send_position_setpoint(initialX, 0, height, 0)
+        time.sleep(0.1)        
+
     # Lands the drone.
+    print(f"{scf.cf.link_uri} landing at {time.time()}...")
     steps = 30
     for i in range(steps, 0, -1):
         currentHeight = height * (i / steps)
-        commander.send_position_setpoint(initialX + distance, 0, currentHeight, 0)
-        time.sleep(0.15) 
+        commander.send_position_setpoint(initialX, 0, currentHeight, 0)
+        time.sleep(0.1)
