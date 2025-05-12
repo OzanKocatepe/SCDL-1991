@@ -120,8 +120,23 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
 
     # Hovers in place to stabilise.
     print(f"{scf.cf.link_uri} hovering at {time.time()}...")
-    for y in range(50):
+    for y in range(30):
         commander.send_position_setpoint(initialX, 0, height, 0)
+        time.sleep(0.1)
+
+    # If this is the leading drone,
+    # move back.
+    if (initialX > -1.0):
+        print(f"{scf.cf.link_uri} moving back at {time.time()}...")
+        newX = initialX - 0.75 + horizontalSeparation
+    # If this is the trailing drone,
+    # just stay in place.
+    else:
+        newX = initialX
+
+    # Continue hovering.
+    for y in range(30):
+        commander.send_position_setpoint(newX, 0, height, 0)
         time.sleep(0.1)
 
     # Hovers in place until the movement time.
