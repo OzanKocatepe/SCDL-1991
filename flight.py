@@ -107,6 +107,9 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Gets a reference to the commander.
     commander = scf.cf.commander
 
+    # Creates the required log file.
+    logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
+
     # Takes off to the desired height.
     print(f"{scf.cf.link_uri} taking off at {time.time()}...")
     steps = 30
@@ -127,9 +130,6 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         commander.send_position_setpoint(initialX, 0, height, 0)
         time.sleep(0.1)
 
-    # Creates the required log file.
-    logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
-
     # Starts logging.
     log = StartLogging(scf, logFile, speed)
 
@@ -137,7 +137,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
     flightTime = time.time() + (distance / speed)
     while ((waitTime := flightTime - time.time()) > 0):
-        print(f"{scf.cf.link_uri} currently flying.")
+        # print(f"{scf.cf.link_uri} currently flying.")
         commander.send_hover_setpoint(speed, 0, 0, height)
         time.sleep(0.1)        
 
