@@ -78,3 +78,13 @@ Saturday:
     - IT WORKS. The positions and velocities seem accurate, the drift seems minimal, and the loggs seem to cover all of the movement and accurately report all of the desired values. Yippee!!
 
     - Got some trial data. Might need to redo it due to the battery levels, and might want to increase the distance. However, it works! (as well as it ever will). (8:58 PM)
+
+Sunday:
+    - Was locked out. Worked on submitted assignments.
+
+Monday:
+    - Just tried flying the drones and they've spontaneously broken since Saturday. At least one motor and one lighthouse deck sensor is broken. I don't know if we have any new components. (4:07 PM)
+
+    - E4 has two broken lighthouse sensors and a motor failing the propellor test by the largest margin I've ever seen. E8 has a motor failing the test, and a motor just completely not spinning. (4:13 PM)
+
+    - Managed to run some trials with mostly working components, but more importantly managed to find some working components in the stash so going to try using those. Also concurrently working on the code to get the battery gradient from the data.

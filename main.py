@@ -41,9 +41,9 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
         extraHeight = [0.5, 0]      # (0.75, 0.5, 0.25, 0)
-        speed = 0.5                  # (0.5, 0.75, 1.0)
+        speed = 0.75                  # (0.5, 0.75, 1.0)
         distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
-        repetition = 0              # (0, 1, 2)
+        repetition = 2              # (0, 1, 2)
 
         # Stores the initial X coordinate of the drones.
         # Lighthouse and PositionHlCommander probably use different coordinate spaces, so I
@@ -65,7 +65,7 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
             t.start()
             threads.append(t)
-            time.sleep(1.0)
+            time.sleep(2.5)
 
         # Waits for all threads to complete.
         for t in threads:
