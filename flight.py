@@ -162,7 +162,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Lands the drone.
     print(f"{scf.cf.link_uri} landing at {time.time()}...")
     steps = 30
-    for i in range(steps, 5, -1):
+    for i in range(steps, 2, -1):
         currentHeight = height * (i / steps)
         commander.send_position_setpoint(initialX, 0, currentHeight, 0)
         time.sleep(0.1)
