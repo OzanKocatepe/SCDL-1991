@@ -55,6 +55,6 @@ def BatteryCallback(uri, data, config, continuous=False):
 
     print(f'{uri},{data["pm.vbat"]},{data["pm.batteryLevel"]}')
     
-    if (data["pm.vbat"] > 4.0 and continuous):
+    if (data["pm.batteryLevel"] > 89.0 and continuous):
             config.stop()
             print(f"{uri} finished charging.")

@@ -90,3 +90,5 @@ Monday:
     - Managed to run some trials with mostly working components, but more importantly managed to find some working components in the stash so going to try using those. Also concurrently working on the code to get the battery gradient from the data.
 
     - Found some working motors so now both drones have working motors, but E4 still has a faulty lighthouse, now 3/4 sensors aren't working. If it still works then I won't replace it, if it doesn't then I will. (5:09 PM)
+
+    - Have been alternating between doing trials and recharging the drones, so far making progress but its slower than I'd like, may have to come in tomorrow. (5:51 PM)
