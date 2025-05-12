@@ -28,7 +28,7 @@ def LightCheck(scf):
     time.sleep(1.0)
     scf.cf.param.set_value('led.bitmask', 0)
 
-def StartLogging(scf, logFile: str) -> LogConfig:
+def StartLogging(scf, logFile: str, speed: float, threshold: float=0.1) -> LogConfig:
     """Tells the Crazyflie to start logging.
 
     Creates the desired log config and callback function and
@@ -38,6 +38,14 @@ def StartLogging(scf, logFile: str) -> LogConfig:
         logFile: str
             The file that the logged data will be saved to.
             Assumes that the file already exists.
+        speed: float
+            The speed this trial is meant to be at. Prints
+            an error to the console if this speed is passed by more than
+            the threshold.
+        threshold: float
+            A float from 0 to 1 which determines how far above the target
+            velocity the drone can go before printing an error to the console.
+            10% by default.
 
     Returns:
         LogConfig:
@@ -68,12 +76,12 @@ def StartLogging(scf, logFile: str) -> LogConfig:
     scf.cf.log.add_config(config)
 
     # Adds the callback functions and starts logging.
-    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(scf.cf.link_uri, timestamp, data, logFile))
+    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(scf.cf.link_uri, timestamp, data, logFile, speed, threshold))
     config.start()
 
     return config
 
-def LogCallback(uri, timestamp, data, logFile: str) -> None:
+def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: float) -> None:
     """Saves the data from the Crazyflie to a file. 
 
     This function is called every time a packet containing
@@ -83,6 +91,13 @@ def LogCallback(uri, timestamp, data, logFile: str) -> None:
     Parameters:
         logFile: str
             The file that the logged data will be saved to.
+        speed: float
+            The speed this trial is meant to be at. Prints
+            an error to the console if this speed is passed by more than
+            the threshold.
+        threshold: float
+            A float from 0 to 1 which determines how far above the target
+            velocity the drone can go before printing an error to the console.
     """
     
     # Gets the position variables.
@@ -100,6 +115,10 @@ def LogCallback(uri, timestamp, data, logFile: str) -> None:
     vel[0] = data['stateEstimate.vx']
     vel[1] = data['stateEstimate.vy']
     vel[2] = data['stateEstimate.vz']
+
+    # Prints an error to the console if the speed in the x-direction is too high.
+    if (vel[0] >= speed * (1 + threshold)):
+        print(f"WARNING: {uri} is travelling at {vel[0]} m/s!")
 
     # Opens the file in append mode.
     file = open(logFile, "a")

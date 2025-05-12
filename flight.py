@@ -131,7 +131,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
 
     # Starts logging.
-    log = StartLogging(scf, logFile)
+    log = StartLogging(scf, logFile, speed)
 
     print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
     # Moves forward the desired distance at the desired speed.
