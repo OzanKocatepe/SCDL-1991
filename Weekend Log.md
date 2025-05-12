@@ -1,3 +1,11 @@
+Final Hours:
+Thursday: 12:00 PM to 8 PM
+Friday: 1 PM to 4:30 PM
+Saturday: 3 PM to 9 PM
+Sunday: Locked out of lab :(
+Monday: 3PM to 9:40 PM
+Total: 24 hours 10 minutes.
+
 Thursday:
 - Drones were drifting
     - Replaced the motors entirely on one of the drones, still drifting.
