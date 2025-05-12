@@ -121,8 +121,8 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         commander.send_position_setpoint(initialX, 0, height, 0)
         time.sleep(0.1)
 
-    print(f"{scf.cf.link_uri} waiting to move at {time.time()}...")
     # Hovers in place until the movement time.
+    print(f"{scf.cf.link_uri} waiting to move at {time.time()}...")
     while ((waitTime := movementTime - time.time()) > 0):
         commander.send_position_setpoint(initialX, 0, height, 0)
         time.sleep(0.1)
@@ -133,8 +133,8 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Starts logging.
     log = StartLogging(scf, logFile, speed)
 
-    print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
     # Moves forward the desired distance at the desired speed.
+    print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
     flightTime = time.time() + (distance / speed)
     while ((waitTime := flightTime - time.time()) > 0):
         print(f"{scf.cf.link_uri} currently flying.")
@@ -162,7 +162,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Lands the drone.
     print(f"{scf.cf.link_uri} landing at {time.time()}...")
     steps = 30
-    for i in range(steps, 0, -1):
+    for i in range(steps, 5, -1):
         currentHeight = height * (i / steps)
         commander.send_position_setpoint(initialX, 0, currentHeight, 0)
         time.sleep(0.1)
