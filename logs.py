@@ -122,7 +122,7 @@ def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: flo
 
     # Prints an error to the console if the battery level is too low.
     if (data["pm.vbat"] < 3.5):
-        print(f"WARNING: {uri} is at battery level {data["pm.vbat"]}.")
+        print(f"WARNING: {uri} is at battery level {data['pm.vbat']}.")
 
     # Opens the file in append mode.
     file = open(logFile, "a")
