@@ -110,6 +110,15 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Creates the required log file.
     logFile = CreateLogFile(logFolder, distance, speed, horizontalSeparation, extraHeight, repetition)
 
+    # If this is the leading drone,
+    # it will move back.
+    if (initialX > -1.0):
+        newX = -1.5 + horizontalSeparation
+    # If this is the trailing drone,
+    # it will stay in place.
+    else:
+        newX = initialX
+
     # Takes off to the desired height.
     print(f"{scf.cf.link_uri} taking off at {time.time()}...")
     steps = 30
@@ -124,17 +133,8 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
         commander.send_position_setpoint(initialX, 0, height, 0)
         time.sleep(0.1)
 
-    # If this is the leading drone,
-    # move back.
-    if (initialX > -1.0):
-        print(f"{scf.cf.link_uri} moving back at {time.time()}...")
-        newX = initialX - 0.75 + horizontalSeparation
-    # If this is the trailing drone,
-    # just stay in place.
-    else:
-        newX = initialX
-
-    # Continue hovering.
+    # Continue hovering or moves back, depending on which drone it is. 
+    print(f"{scf.cf.link_uri} moving to {newX} at {time.time()}...")
     for y in range(30):
         commander.send_position_setpoint(newX, 0, height, 0)
         time.sleep(0.1)
@@ -142,7 +142,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     # Hovers in place until the movement time.
     print(f"{scf.cf.link_uri} waiting to move at {time.time()}...")
     while ((waitTime := movementTime - time.time()) > 0):
-        commander.send_position_setpoint(initialX, 0, height, 0)
+        commander.send_position_setpoint(newX, 0, height, 0)
         time.sleep(0.1)
 
     # Starts logging.
@@ -163,7 +163,7 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
     print(f"{scf.cf.link_uri} hovering at time {time.time()}...")
     hoverTime = time.time() + 5.0
     while ((waitTime := hoverTime - time.time()) > 0):
-        commander.send_position_setpoint(initialX + distance, 0, height, 0)
+        commander.send_position_setpoint(newX + distance, 0, height, 0)
         # commander.send_hover_setpoint(0, 0, 0, DEFAULT_HEIGHT + extraHeight)
         time.sleep(0.1)
 

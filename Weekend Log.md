@@ -100,3 +100,8 @@ Monday:
     - Found some working motors so now both drones have working motors, but E4 still has a faulty lighthouse, now 3/4 sensors aren't working. If it still works then I won't replace it, if it doesn't then I will. (5:09 PM)
 
     - Have been alternating between doing trials and recharging the drones, so far making progress but its slower than I'd like, may have to come in tomorrow. (5:51 PM)
+
+    - Had to remove 3 hours of work, almost half my overall trials. (~9:20 PM, written on Tuesday)
+
+Tuesday:
+    - Going to try doing trials with the normal batteries at the same time as the larger batteries, but keeping the datasets seperate. Because theoretically I have a lot more normal batteries, so I'll prioritise the higher capacity batteries, but while the 350mAhs are charging, I'll work with my many 250mAh. If this ends up overtaking the original dataset, I'll work with the 250mAhs only. (3:25 PM)

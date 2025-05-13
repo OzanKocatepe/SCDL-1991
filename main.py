@@ -11,7 +11,9 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.utils import uri_helper
 
 # Constants.
-LOG_FOLDER = "./logs"
+# LOG_FOLDER = "./350mAh_logs"
+# LOG_FOLDER = "./250mAh_logs"
+LOG_FOLDER = "./testlogs"
 TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m away from the trailing drone.
 
 # Gets URI
@@ -40,8 +42,8 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
 
         # Stores the trial parameters.
         horizontalSeparation = 0.75  # (1.0, 0.75, 0.5, 0.25)
-        extraHeight = [0.75, 0]      # (0.75, 0.5, 0.25, 0)
-        speed = 1.0                  # (0.5, 0.75, 1.0)
+        extraHeight = [0.25, 0]      # (0.75, 0.5, 0.25, 0)
+        speed = 0.5                  # (0.5, 0.75, 1.0)
         distance = TRIAL_DISTANCE + (1.0 - horizontalSeparation)
         repetition = 0               # (0, 1, 2)
 
@@ -50,11 +52,11 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # probably don't actually need these, but its nice to keep the two coordinate systems
         # aligned.
         initialX = [-0.75, -1.5]
-
+ 
         # Sets the times for take off and movement.
         referenceTime = time.time()
         takeOffTime = [referenceTime, referenceTime]
-        movementTime = takeOffTime[1] + 10.0
+        movementTime = takeOffTime[1] + 12.0
 
         # Launch each Crazyflie in its own thread
         threads = []
