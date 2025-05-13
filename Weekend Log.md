@@ -4,7 +4,8 @@ Friday: 1 PM to 4:30 PM
 Saturday: 3 PM to 9 PM
 Sunday: Locked out of lab :(
 Monday: 3PM to 9:40 PM
-Total: 24 hours 10 minutes.
+Tuesday: 3:15 to 5:45 PM
+Total: 26 hours 40 minutes.
 
 Thursday:
 - Drones were drifting
@@ -111,3 +112,8 @@ Tuesday:
     - While the drones are charging so I can continue trying to get them to work, I found out there are util functions for powering and unpowering the Crazyflie and resetting estimators, so I'm going to try to start using those. Hopefully the restarting means I don't have to constantly restart the Crazyflies manually. (4:19 PM)
 
     - Okay so restarting them automatically doesn't work since the lighthouse deck doesn't detect signals again for some reason -- the drones do take off but without position estimates they just fly into the net. The reset_estimation seems to have worked better though? Also, I changed the forwards movement code from velocity-based to position-based, but giving the position commands at a rate that should keep the velocity as desired. It seems to be mostly working, though the velocity does go higher every so often. If I can get velocity-based movement working again I'd rather use that, but I think this may have to do so that the drones at least don't drift absurdly. (4:34 PM)
+
+    - While the drones were charging I set up more wireless chargers, but we only have 5, so I can only charge 2 350mAh batteries and 3 250mAh batteries. I can't even use USB for half of them, not just because its too slow but also half the charging bases don't have USB ports.
+    ON TOP of that, the python code now just won't even connect to the drones. Its been 2 and a half hours and I haven't managed to get a single working trial. (5:25 PM)
+
+    - Got the python code to connect again, back drone still having issues with taking off.

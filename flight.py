@@ -150,12 +150,15 @@ def RunOneTrial(scf, initialX, logFolder: str, distance: float, speed: float, ho
 
     # Moves forward the desired distance at the desired speed.
     print(f"{scf.cf.link_uri} moving forward at time {time.time()}...")
-    flightTime = time.time() + (distance / speed)
+    
+    # Uses velocity inputs.
+    # flightTime = time.time() + (distance / speed)
     # while ((waitTime := flightTime - time.time()) > 0):
     #     # print(f"{scf.cf.link_uri} currently flying.")
     #     commander.send_hover_setpoint(speed, 0, 0, height)
     #     time.sleep(0.1)        
 
+    # Uses position inputs.
     flightDuration = 10 * distance / speed
     for i in range(int(flightDuration)):
         x = newX + (i * distance / flightDuration)
