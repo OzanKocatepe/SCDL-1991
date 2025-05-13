@@ -105,3 +105,7 @@ Monday:
 
 Tuesday:
     - Going to try doing trials with the normal batteries at the same time as the larger batteries, but keeping the datasets seperate. Because theoretically I have a lot more normal batteries, so I'll prioritise the higher capacity batteries, but while the 350mAhs are charging, I'll work with my many 250mAh. If this ends up overtaking the original dataset, I'll work with the 250mAhs only. (3:25 PM)
+
+    - So apparently the back drone doesn't work, I tried replacing its motor which failed the propellor test and replacing the lighthouse deck to the best one I could find (only 1 broken sensor, we don't have any fresh ones I believe), and its now taking off and landing properly but it can't move in-line with the other drone, so it might not actually be affected by the turbulence. (~3:40 PM, written at 4:16 PM)
+
+    - While the drones are charging so I can continue trying to get them to work, I found out there are util functions for powering and unpowering the Crazyflie and resetting estimators, so I'm going to try to start using those. Hopefully the restarting means I don't have to constantly restart the Crazyflies manually. (4:19 PM)

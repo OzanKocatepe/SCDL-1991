@@ -8,7 +8,7 @@ from flight import *
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
-from cflib.utils import uri_helper
+from cflib.utils import reset_estimator
 
 # Constants.
 # LOG_FOLDER = "./350mAh_logs"
@@ -33,13 +33,6 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # Stores the scf references.
         scf = [scf1, scf2]
 
-        for s in scf:
-            # Resets the estimators.
-            s.cf.param.set_value('kalman.resetEstimation', '1')
-            time.sleep(0.5)
-            s.cf.param.set_value('kalman.resetEstimation', '0')
-            time.sleep(2.0)
-
         # Stores the trial parameters.
         horizontalSeparation = 0.75  # (1.0, 0.75, 0.5, 0.25)
         extraHeight = [0.25, 0]      # (0.75, 0.5, 0.25, 0)
@@ -52,7 +45,11 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         # probably don't actually need these, but its nice to keep the two coordinate systems
         # aligned.
         initialX = [-0.75, -1.5]
- 
+
+        # Resets the estimators.
+        for s in scf:
+            reset_estimator.reset_estimator(s)
+
         # Sets the times for take off and movement.
         referenceTime = time.time()
         takeOffTime = [referenceTime, referenceTime]
