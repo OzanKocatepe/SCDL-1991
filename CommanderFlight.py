@@ -36,6 +36,8 @@ class CommanderFlight:
             Makes the drone land.
         MoveToPosition:
             Moves the drone to a position at a certain velocity.
+        DiagnosticFlight:
+            Makes the drone take off, hover, and then land.
         Hover:
             Makes the drone hover in place.
         Loop:
@@ -140,9 +142,10 @@ class CommanderFlight:
         """
 
         distance = [ position[0] - self.x, position[1] - self.y, position[2] - self.z ]
+        distanceMagnitude = math.sqrt(distance[0]**2 + distance[1]**2 + distance[2]**2)
         initialPosition = [self.x, self.y, self.z]
         
-        flightSteps = int(10 * distance / velocity)
+        flightSteps = int(10 * distanceMagnitude / velocity)
         for i in range(flightSteps):
             newX = initialPosition[0] + (i * distance[0] / flightSteps)
             newY = initialPosition[1] + (i * distance[1] / flightSteps)
@@ -168,7 +171,7 @@ class CommanderFlight:
             time.sleep(0.1)
 
     def DiagnosticFlight(self, logFolder: str):
-        """Makes the drone take off, move forward, and land.
+        """Makes the drone take off, hover, and land.
 
         logFolder: str
             The path to the log folder to output to.
@@ -182,7 +185,7 @@ class CommanderFlight:
         self.Hover(5.0)
         self.Land()
 
-    def Loop(self, logFolder: str, speed: float) -> None:
+    def Loop(self, logFolder: str, speed: float, height: float, startTime: float, separation: float, isLeading: bool) -> None:
         """Makes the drone do laps around the system.
         
         Parameters:
@@ -190,25 +193,67 @@ class CommanderFlight:
                 The folder to save the log to.
             speed: float
                 The speed for the drone to move at.
+            height: float
+                The height for this drone to take off to.
+            startTime: float
+                The time for both drones to initially start moving.
+            separation: float
+                The vertical and horizontal separation between the drones in m.
+            isLeading: bool
+                Whether the current drone is leading or not.
         """
 
-        cornerCoordinates = [(-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1)]
+        corners = [(-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1)]
+        # Changes the start and end positions of each leg depending on whether the drone
+        # is leading or trailing.
+        if (isLeading):
+            # Start slightly ahead of the corner.
+            startCoordinates = [(corners[0][0] + separation, corners[0][1]),
+                                (corners[1][0], corners[1][1] + separation),
+                                (corners[2][0] - separation, corners[2][1]),
+                                (corners[3][0], corners[3][1] - separation)]
+            # End on the corners.
+            endCoordinates = [corners[1], corners[2], corners[3], corners[0]]
+        else:
+            # Start on the corner.
+            startCoordinates = corners
+            # End slightly behind the corners.
+            endCoordinates = [(corners[1][0] - separation, corners[1][1]),
+                              (corners[2][0], corners[2][1] - separation),
+                              (corners[3][0] + separation, corners[3][1]),
+                              (corners[0][0], corners[0][1] + separation)]
 
         # Creates the log file.
         logFile = logs.CreateSimpleLogFile(logFolder)
         logs.StartLogging(self, logFile, speed)
 
         # Takes off and hovers to stabilise.
-        self.TakeOff()
+        self.TakeOff(height)
         self.Hover(DEFAULT_DELAY)
+        self.MoveToPosition([startCoordinates[0][0], startCoordinates[0][1], height], 0.5)
+        self.Hover(DEFAULT_DELAY)
+
+        # Hovers in place until the start time.
+        while (startTime - time.time()) > 0:
+            self.Hover(0.1)
 
         # Loops as long as the drone has enough battery.
         cornerIndex = 0
-        # while (self.batP >= 20):
+        # while (self.batV >= 3.4):
         for i in range(4):
-            position = [ cornerCoordinates[cornerIndex][0], cornerCoordinates[cornerIndex][1], self.z]
+            # Moves to the end position.
+            position = [ endCoordinates[cornerIndex][0], endCoordinates[cornerIndex][1], height]
             self.MoveToPosition(position, velocity=speed)
+            self.Hover(DEFAULT_DELAY)
+
+            # Updates the corner index.
             cornerIndex += 1
+            if (cornerIndex == 4):
+                cornerIndex = 0
+
+            # Moves to the next start position.
+            position = [ startCoordinates[cornerIndex][0], startCoordinates[cornerIndex][1], height]
+            self.MoveToPosition(position, velocity=speed)
             self.Hover(DEFAULT_DELAY)
 
         # Lands when the battery is too low.
