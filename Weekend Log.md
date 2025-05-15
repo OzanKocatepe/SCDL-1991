@@ -117,3 +117,6 @@ Tuesday:
     ON TOP of that, the python code now just won't even connect to the drones. Its been 2 and a half hours and I haven't managed to get a single working trial. (5:25 PM)
 
     - Got the python code to connect again, back drone still having issues with taking off.
+
+Thursday:
+    - Created a new class that modularised the flight code using the commander, so now writing new logic is way easier. Spent a couple hours on that, and replaced the motor of the failing drone (for some reason now it can actually take off, but the motor had penetrated through its carrier thing so I just replaced that and now its better) so I believe the drones are mostly working. (8:13 PM)
