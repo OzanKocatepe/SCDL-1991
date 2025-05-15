@@ -160,11 +160,7 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
 
     # Determines how many files have already been created today
     # so that it can accurately set the index in the log file's name.
-    filesToday = 0
-    logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
-    while (os.path.exists(logFile)):
-        filesToday += 1
-        logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
+    logFile = DetermineNextLogFile(logFolder)
 
     # Creates the file or appends data to an already
     # existing file and writes the header to the file.
@@ -182,6 +178,46 @@ def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSepar
     file.write(f"heightAboveDefault: {extraHeight}\n")
     file.write(f"trial: {repetition}\n")
     file.write("==========================================\n")
+    file.close()
+
+    return logFile
+
+def DetermineNextLogFile(logFolder: str) -> str:
+    """Determines the next valid log file to create in a given folder.
+    
+    Parameters:
+        logFolder: str
+            The folder to determine the
+            log file in.
+
+    Returns:
+        str:
+            The path to the next valid log file.
+    """
+
+    filesToday = 0
+    logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
+    while (os.path.exists(logFile)):
+        filesToday += 1
+        logFile = f"{logFolder}/{str(datetime.date.today())}-{filesToday}.csv"
+
+    return logFile
+
+def CreateSimpleLogFile(logFolder: str) -> str:
+    """Creates a log file with just the basic header, no trial data.
+
+    Parameters:
+        logFolder: str
+            The folder to create the log file in.
+
+    Return:
+        logFile: str
+            The path to the newly created log file.
+    """
+
+    logFile = DetermineNextLogFile(logFolder)
+    file = open(logFile, 'a')
+    file.write("timestamp,uri,x,y,z,vx,vy,vz,batteryV,battery%\n")
     file.close()
 
     return logFile

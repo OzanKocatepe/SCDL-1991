@@ -1,6 +1,7 @@
 from flight import DEFAULT_HEIGHT, DEFAULT_TIME, DEFAULT_DELAY
-from logs import *
+import logs
 import math
+import time
 
 class CommanderFlight:
     """Contains the functions for controlling a Crazyflie using
@@ -27,22 +28,35 @@ class CommanderFlight:
             The battery level in volts.
     
     Methods:
-        TakeOff"""
+        UpdateState:
+            Updates the attributes of the instance.
+        TakeOff:
+            Makes the drone take off.
+        Land:
+            Makes the drone land.
+        MoveToPosition:
+            Moves the drone to a position at a certain velocity.
+        Hover:
+            Makes the drone hover in place.
+        Loop:
+            Makes the drone do laps around a square path
+            until it drops below 20% battery.
+    """
     
     def __init__(self, scf):
         """Initialises a CommanderFlight object.
         """
 
-        scf = scf
-        commander = scf.cf.commander
-        x = 0
-        y = 0
-        z = 0
-        vx = 0
-        vy = 0
-        vz = 0
-        batV = 0
-        batP = 0
+        self.scf = scf
+        self.commander = scf.cf.commander
+        self.x = 0
+        self.y = 0
+        self.z = 0
+        self.vx = 0
+        self.vy = 0
+        self.vz = 0
+        self.batV = 0
+        self.batP = 0
 
     def UpdateState(self, position: list[float], velocity: list[float], batV: float, batP: float) -> None:
         """Updates the attributes of the CommanderFlight instance.
@@ -153,11 +167,36 @@ class CommanderFlight:
             self.commander.send_position_setpoint(pos[0], pos[1], pos[2], yaw)
             time.sleep(0.1)
 
-    def Loop(self, logFolder: str):
+    def DiagnosticFlight(self, logFolder: str):
+        """Makes the drone take off, move forward, and land.
+
+        logFolder: str
+            The path to the log folder to output to.
+        """
+
+        logFile = logs.CreateSimpleLogFile(logFolder)
+        logs.StartLogging(self, logFile, 1000) # Speed at 1000 so that the error is never printed to console
+        time.sleep(0.2) # Pauses to let the log data update the position.
+
+        self.TakeOff()
+        self.Hover(5.0)
+        self.Land()
+
+    def Loop(self, logFolder: str, speed: float) -> None:
+        """Makes the drone do laps around the system.
+        
+        Parameters:
+            logFolder: str
+                The folder to save the log to.
+            speed: float
+                The speed for the drone to move at.
+        """
+
         cornerCoordinates = [(-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1)]
 
         # Creates the log file.
-        CreateLogFile(logFolder, )
+        logFile = logs.CreateSimpleLogFile(logFolder)
+        logs.StartLogging(self, logFile, speed)
 
         # Takes off and hovers to stabilise.
         self.TakeOff()
@@ -168,9 +207,9 @@ class CommanderFlight:
         # while (self.batP >= 20):
         for i in range(4):
             position = [ cornerCoordinates[cornerIndex][0], cornerCoordinates[cornerIndex][1], self.z]
-            self.MoveToPosition(position, velocity=0.2)
+            self.MoveToPosition(position, velocity=speed)
             cornerIndex += 1
             self.Hover(DEFAULT_DELAY)
 
         # Lands when the battery is too low.
-        self.Land()
+        self.Land() 

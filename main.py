@@ -11,9 +11,10 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.utils import reset_estimator
 
 # Constants.
-# LOG_FOLDER = "./350mAh_logs"
-LOG_FOLDER = "./250mAh_logs"
-# LOG_FOLDER = "./testlogs"
+LARGE_BATTERY_FOLDER = "./350mAh_logs"
+SMALL_BATTERY_FOLDER =  "./250mAh_logs"
+LAP_FOLDER = "./lap_logs"
+TEST_FOLDER = "./test_logs"
 TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m away from the trailing drone.
 
 # Gets URI
@@ -30,8 +31,8 @@ cflib.crtp.init_drivers()
 
 with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
     with SyncCrazyflie(URIS[1], cf=Crazyflie(rw_cache='./cache')) as scf2:
-        # Stores the scf references.
-        scf = [scf1, scf2]
+        # Stores the CommanderFlight references.
+        com = [CommanderFlight(scf1), CommanderFlight(scf2)]
 
         # Stores the trial parameters.
         horizontalSeparation = 1.0  # (1.0, 0.75, 0.5, 0.25)
@@ -47,8 +48,8 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
         initialX = [-0.75, -1.5]
 
         # Resets the estimators.
-        for s in scf:
-            reset_estimator.reset_estimator(s)
+        for c in com:
+            reset_estimator.reset_estimator(c.scf)
 
         # Sets the times for take off and movement.
         referenceTime = time.time()
@@ -60,8 +61,9 @@ with SyncCrazyflie(URIS[0], cf=Crazyflie(rw_cache='./cache')) as scf1:
 
         # Creates a thread for each drone. 
         for i in range(len(URIS)):
-            t = threading.Thread(target=RunOneTrial, args=(scf[i], initialX[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
+            # t = threading.Thread(target=RunOneTrial, args=(scf[i], initialX[i], LOG_FOLDER, distance, speed, horizontalSeparation, extraHeight[i], takeOffTime[i], movementTime, repetition))
             # t = threading.Thread(target=DiagnosticFlightSimple, args=(scf[i],))
+            t = threading.Thread(target=com[i].DiagnosticFlight, args=(TEST_FOLDER,))
             t.start()
             threads.append(t)
             time.sleep(2.0)
