@@ -5,7 +5,7 @@ from cflib.positioning.position_hl_commander import PositionHlCommander
 from cflib.crazyflie.high_level_commander import HighLevelCommander
 from logs import *
 
-DEFAULT_HEIGHT = 0.5
+DEFAULT_HEIGHT = 0.75
 DEFAULT_TIME = 3.0
 DEFAULT_DELAY = 3.0
 

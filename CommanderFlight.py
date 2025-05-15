@@ -203,7 +203,12 @@ class CommanderFlight:
                 Whether the current drone is leading or not.
         """
 
-        corners = [(-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1)]
+        # Defines the range of the box.
+        xRange = [-1, 1]
+        yRange = [-1, 1]
+        # Defines the corners of the box.
+        corners = [(xRange[0], yRange[0]), (xRange[1], yRange[0]), (xRange[1], yRange[1]), (xRange[0], yRange[1])]
+
         # Changes the start and end positions of each leg depending on whether the drone
         # is leading or trailing.
         if (isLeading):
@@ -240,7 +245,7 @@ class CommanderFlight:
         # Loops as long as the drone has enough battery.
         cornerIndex = 0
         # while (self.batV >= 3.4):
-        for i in range(4):
+        for i in range(2):
             # Moves to the end position.
             position = [ endCoordinates[cornerIndex][0], endCoordinates[cornerIndex][1], height]
             self.MoveToPosition(position, velocity=speed)

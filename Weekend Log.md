@@ -120,3 +120,11 @@ Tuesday:
 
 Thursday:
     - Created a new class that modularised the flight code using the commander, so now writing new logic is way easier. Spent a couple hours on that, and replaced the motor of the failing drone (for some reason now it can actually take off, but the motor had penetrated through its carrier thing so I just replaced that and now its better) so I believe the drones are mostly working. (8:13 PM)
+
+    - Wrote tons of code (seen in git repo) to get the loop functionality to work. The logic seems to be working, but the trailing drone E8 does NOT know where it is despite re-estimating its geometry, so I'm starting to think the lighthouse deck might be broken. Will check in cfclient. (9:14 PM)
+
+    - Yep, 3/4 sensors on E8's lighthouse deck have now failed. (9:15 PM)
+
+    - Replaced E8's lighthouse deck. Tried making the drones fly in a smaller box so that the base stations more easily see them (despite them having full green LEDs on the original corners, still thought it was worth a shot). Tried making the drones fly higher since apparently the lighthouse decks work best when the drones are up to ~50 cm below the base stations, but still both drones are wobbling a lot. Also, for some reason the time sync between the threads isn't working. This has to be a logic error but I just keep pushing back the drone's start time and they just...continue not being in sync. Its probably really trivial and I'm too tired to figure it out today.
+    Going to try charging the drones a bit and trying the loop again, if that doesn't work I'm going home, it almost 10 PM and I'm hungry.
+    Also still need to work on the presentation and all that, AND need to implement the logic to log the total distance travelled in the log file at some point. (9:45 PM)

@@ -19,7 +19,7 @@ TRIAL_DISTANCE = 2.0 # The distance travelled by the leading drone when its 1.0m
 
 # Gets URI
 URIS = [
-    # "radio://1/80/2M/E7E7E7E7E4" # LEADING DRONE
+    "radio://1/80/2M/E7E7E7E7E4", # LEADING DRONE
     "radio://0/60/2M/E7E7E7E7E8"  # TRAILING DRONE
 ]
 
@@ -58,7 +58,7 @@ for s in scf:
 
 # Sets the times for take off and movement.
 referenceTime = time.time()
-startTime = referenceTime + 7.0
+startTime = referenceTime + 15
 
 speed = 0.5 # (0.5, 0.75, 1.0)
 separation = 0.65 # (0.5, 0.65, 1.0)
