@@ -1,3 +1,4 @@
+from CommanderFlight import CommanderFlight
 import datetime
 import os
 import time
@@ -28,13 +29,15 @@ def LightCheck(scf):
     time.sleep(1.0)
     scf.cf.param.set_value('led.bitmask', 0)
 
-def StartLogging(scf, logFile: str, speed: float, threshold: float=0.1) -> LogConfig:
+def StartLogging(com: CommanderFlight, logFile: str, speed: float, threshold: float=0.1) -> LogConfig:
     """Tells the Crazyflie to start logging.
 
     Creates the desired log config and callback function and
     starts logging.
 
     Parameters:
+        com: CommanderFlight
+            An instance of CommanderFlight linked to a Crazyflie.
         logFile: str
             The file that the logged data will be saved to.
             Assumes that the file already exists.
@@ -73,15 +76,15 @@ def StartLogging(scf, logFile: str, speed: float, threshold: float=0.1) -> LogCo
     config.add_variable('pm.batteryLevel', 'FP16')
 
     # Adds the configs to the crazyflie.
-    scf.cf.log.add_config(config)
+    com.scf.cf.log.add_config(config)
 
     # Adds the callback functions and starts logging.
-    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(scf.cf.link_uri, timestamp, data, logFile, speed, threshold))
+    config.data_received_cb.add_callback(lambda timestamp, data, _logconf: LogCallback(com, timestamp, data, logFile, speed, threshold))
     config.start()
 
     return config
 
-def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: float) -> None:
+def LogCallback(com: CommanderFlight, timestamp, data, logFile: str, speed: float, threshold: float) -> None:
     """Saves the data from the Crazyflie to a file. 
 
     This function is called every time a packet containing
@@ -89,6 +92,8 @@ def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: flo
     into a .csv file.
 
     Parameters:
+        com: CommanderFlight
+            The instance of CommanderFlight that the drone is connected to.
         logFile: str
             The file that the logged data will be saved to.
         speed: float
@@ -118,7 +123,7 @@ def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: flo
 
     # Prints an error to the console if the speed in the x-direction is too high.
     if (vel[0] >= speed * (1 + threshold)):
-        print(f"WARNING: {uri} is travelling at {vel[0]} m/s!")
+        print(f"WARNING: {com.scf.cf.link_uri} is travelling at {vel[0]} m/s!")
 
     # Prints an error to the console if the battery level is too low.
     # if (data["pm.vbat"] < 3.5):
@@ -128,7 +133,8 @@ def LogCallback(uri, timestamp, data, logFile: str, speed: float, threshold: flo
     file = open(logFile, "a")
 
     # Writes to the file in csv form and then closes it.
-    file.write(f'{timestamp},{uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]},{data["pm.batteryLevel"]}\n')
+    file.write(f'{timestamp},{com.scf.cf.link_uri},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{data["pm.vbat"]},{data["pm.batteryLevel"]}\n')
+    com.UpdateState(pos, vel, data["pm.vbat"], data["pm.batteryLevel"])
     file.close()
 
 def CreateLogFile(logFolder: str, distance: float, speed: float, horizontalSeparation: float, extraHeight: float, repetition: int) -> str:
