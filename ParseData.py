@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 LOG_FOLDER = "./350mAh_logs"
-OUTPUT_FOLDER = "."
+OUTPUT_FOLDER = "./plots"
+
+MIN_VOLTAGE = 3.2
+MAX_VOLTAGE = 4.2
 
 def ExtractBatteryUsageRateFromFile(fileName: str) -> float:
     """Gets the rate of battery usage from a file.
@@ -120,7 +123,7 @@ def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
 
     return velocity, horizontalSeparation, verticalSeparation, leading
 
-def ExtractBatteryUsageFromFolder(folder: str) -> dict[tuple[float, float, float, bool], float]:
+def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[tuple[float, float, float, bool], float]:
     """Extracts the battery usage for each trial from a folder.
 
     Automatically averages all the trials for the same configuration
@@ -130,13 +133,15 @@ def ExtractBatteryUsageFromFolder(folder: str) -> dict[tuple[float, float, float
         folder: str
             The folder where the data is stored.
             Assumes the only thing in this folder is valid .csv files.
+        percentage: bool
+            Determines whether to return the rates in V/s or %/s.
 
     Returns:
         dict[list[float, float, float, bool], float]:
             A dictionary where the keys are a list of floats of the form
             [velocity, horizontalSeparation, verticalSeparation, leading]
             and the values are the average battery usage for that
-            configuration in V/s.
+            configuration in V/s or %/s.
     """
 
     # Stores the averaged entries.
@@ -149,6 +154,9 @@ def ExtractBatteryUsageFromFolder(folder: str) -> dict[tuple[float, float, float
         key = (vel, horiz, vert, leading)
 
         rate = ExtractBatteryUsageRateFromFile(folder + "/" + file)
+        # If desired, we convert from V/s to %/s.
+        if (percentage):
+            rate = rate * 100 / (MAX_VOLTAGE - MIN_VOLTAGE)
 
         # If we've already seen this entry before.
         if key in output.keys():
@@ -165,8 +173,119 @@ def ExtractBatteryUsageFromFolder(folder: str) -> dict[tuple[float, float, float
 
     return output
 
-rates = ExtractBatteryUsageFromFolder(LOG_FOLDER)
-print("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s)")
-for key in rates.keys():
-    print(f"{key}, {rates[key]}")
-print(f"Total number of unique datasets: {len(rates.keys())}")
+def FilterDronePositions(rates: dict[tuple[float, float, float, bool], float], filterLeading: bool) -> dict[tuple[float, float, float, bool], float]:
+    """Filters out all of the leading or trailing drone data.
+    
+    Parameters:
+        rates: dict[tuple[float, float, float, bool], float]
+            A dict where the keys are tuples containing the
+            (velocity, horizontalSeparation, verticalSeparation, isLeading)
+            and the corresponding values are the battery consumption rates.
+        filterLeading: bool
+            If true, leaves only the leading drones.
+            If false, leaves only the trailing drones.
+
+    Returns:
+        dict[tuple[float, float, float, bool], float]
+            The data give in "rates" with only the leading
+            or trailing drones remaining.
+    """
+
+    output = {}
+
+    # Loops through every key in the dictionary.
+    for key in rates.keys():
+        # If we want the leading drones and
+        # this is a leading drone, add it to output.
+        if (key[3] and filterLeading):
+            output[key] = rates[key]
+
+        # If we want trailing drones and this
+        # is a trailing drone, add it to the output.
+        elif (not key[3] and not filterLeading):
+            output[key] = rates[key]
+
+    return output
+
+def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentage: bool=True) -> None:
+    """Plots the battery level over time and saves it to a folder.
+
+    Parameters:
+        fileName: str
+            The name of the file containing the battery data.
+        outputFolder: str
+            The folder to save the plot to.
+        convertToPercentage: bool
+            Whether to plot the battery level in percentage or volts.
+    """
+    
+    # Extracts the data from the file.
+    timestamps, batteryLevels = ExtractBatteryUsageDataFromFile(fileName)
+    
+    # Converts the voltages to percentages if desired.
+    if (convertToPercentage):
+        batteryLevels = [(bat - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) for bat in batteryLevels]
+
+    # Gets the trendline data.
+    trendlineBatteryLevels = CreateTrendline(timestamps, batteryLevels)
+
+    # Gets the file label.
+    vel, hSep, vSep, isLead = ExtractHeaderFromFile(fileName)
+
+    # Determines the next valid file name.
+    fileNameIndex = 0
+    while (os.path.exists(outputFileName := f"({vel}, {hSep}, {vSep}, {isLead})-{fileNameIndex}")):
+        fileNameIndex += 1
+
+    # Plots the curve.
+    plt.plot(timestamps, batteryLevels, 'o')
+    # Plots the trendline.
+    plt.plot(timestamps, trendlineBatteryLevels)
+
+    # Writes the title and axis labels.
+    plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}")
+    plt.xlabel("Time (s)")
+    if convertToPercentage:
+        plt.ylabel("Battery Charge (%)")
+    else:
+        plt.ylabel("Battery Charge (V)")
+
+    # Saves the figure to the output folder.
+    plt.savefig(outputFolder + "/" + outputFileName + ".png")
+    plt.clf()
+
+def PlotBatteryFromFolder(folderName: str, outputFolder: str, convertToPercentage: bool=True) -> None:
+    """Plots the battery level over time of all the trial files in a folder.
+    
+    Parameters:
+        folderName: str
+            The name of the folder to parse through.
+        outputFolder: str
+            The folder to save the plot to.
+        convertToPercentage: bool
+            Whether to plot the battery level in percentage of volts.
+    """
+
+    for file in os.listdir(folderName):
+        SaveBatteryPlotToFolder(folderName + "/" + file, outputFolder, convertToPercentage)
+
+# ===========================================================================================================
+
+file = open("rates.csv", 'w')
+
+# Gets the battery usage rates in V/s and %/s.
+ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
+ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
+
+# Filters out all of the leading drones, so we are left with only trailing drones.
+ratesVoltage= FilterDronePositions(ratesVoltage, False)
+ratesPercentage = FilterDronePositions(ratesPercentage, False)
+
+# Writes it to the file.
+file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
+for key in ratesVoltage.keys():
+    file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
+
+file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
+
+PlotBatteryFromFolder("350mAh_logs", OUTPUT_FOLDER)
