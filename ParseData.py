@@ -128,7 +128,7 @@ def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
 
     return velocity, horizontalSeparation, verticalSeparation, leading, trialNum
 
-def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[tuple[float, float, float, bool], float]:
+def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False, minVoltage: float=MIN_VOLTAGE, maxVoltage: float=MAX_VOLTAGE) -> dict[tuple[float, float, float, bool], float]:
     """Extracts the battery usage for each trial from a folder.
 
     Automatically averages all the trials for the same configuration
@@ -140,6 +140,10 @@ def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[t
             Assumes the only thing in this folder is valid .csv files.
         percentage: bool
             Determines whether to return the rates in V/s or %/s.
+        minVoltage: float
+            The voltage corresponding to a fully uncharged battery.
+        maxVoltage: float
+            The voltage corresponding to a fully charged battery.
 
     Returns:
         dict[list[float, float, float, bool], float]:
@@ -161,7 +165,7 @@ def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[t
         rate = ExtractBatteryUsageRateFromFile(folder + "/" + file)
         # If desired, we convert from V/s to %/s.
         if (percentage):
-            rate = rate * 100 / (MAX_VOLTAGE - MIN_VOLTAGE)
+            rate = rate * 100 / (maxVoltage - minVoltage)
 
         # If we've already seen this entry before.
         if key in output.keys():
@@ -212,7 +216,7 @@ def FilterDronePositions(rates: dict[tuple[float, float, float, bool], float], f
 
     return output
 
-def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentage: bool=True) -> None:
+def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentage: bool=True, minVoltage: float=MIN_VOLTAGE, maxVoltage: float=MAX_VOLTAGE) -> None:
     """Plots the battery level over time and saves it to a folder.
 
     Parameters:
@@ -222,6 +226,10 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
             The folder to save the plot to.
         convertToPercentage: bool
             Whether to plot the battery level in percentage or volts.
+        minVoltage: float
+            The voltage corresponding to a fully uncharged battery.
+        maxVoltage: float
+            The voltage corresponding to a fully charged battery.
     """
     
     # Extracts the data from the file.
@@ -229,7 +237,7 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     
     # Converts the voltages to percentages if desired.
     if (convertToPercentage):
-        batteryLevels = [(bat - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) for bat in batteryLevels]
+        batteryLevels = [(bat - minVoltage) / (maxVoltage - minVoltage) for bat in batteryLevels]
 
     # Gets the trendline data.
     trendlineBatteryLevels = CreateTrendline(timestamps, batteryLevels)
@@ -257,7 +265,7 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     plt.savefig(outputFolder + "/" + outputFileName + ".png")
     plt.clf()
 
-def PlotBatteryFromFolder(folderName: str, outputFolder: str, convertToPercentage: bool=True) -> None:
+def PlotBatteryFromFolder(folderName: str, outputFolder: str, convertToPercentage: bool=True, minVoltage: float=MIN_VOLTAGE, maxVoltage: float=MAX_VOLTAGE) -> None:
     """Plots the battery level over time of all the trial files in a folder.
     
     Parameters:
@@ -267,10 +275,14 @@ def PlotBatteryFromFolder(folderName: str, outputFolder: str, convertToPercentag
             The folder to save the plot to.
         convertToPercentage: bool
             Whether to plot the battery level in percentage of volts.
-    """
+        minVoltage: float
+            The voltage corresponding to a fully uncharged battery.
+        maxVoltage: float
+            The voltage corresponding to a fully charged battery.
+    """ 
 
     for file in os.listdir(folderName):
-        SaveBatteryPlotToFolder(folderName + "/" + file, outputFolder, convertToPercentage)
+        SaveBatteryPlotToFolder(folderName + "/" + file, outputFolder, convertToPercentage, minVoltage, maxVoltage)
 
 def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
     """Replaces a line in a file with the desired text.
@@ -301,24 +313,53 @@ def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
     for line in lines:
         file.write(line)
 
+def DetermineMinAndMaxFromFolder(folderName: str) -> tuple[float, float]:
+    """Determines the minimum and maximum battery voltage that occurs in a folder of .csv files.
+    
+    Parameters:
+        folderName: str
+            The path to the folder to parse through.
+    
+    Returns:
+        tuple(float, float):
+            Returns the min and max in a tuple of floats.
+    """
+
+    mins = []
+    maxs = []
+
+    # Loops through the files in the folder.
+    for file in os.listdir(folderName):
+        # Gets the min and max battery level in volts from the file.
+        timestamps, batteryLevels = ExtractBatteryUsageDataFromFile(f"{folderName}/{file}")
+        mins.append(min(batteryLevels))
+        maxs.append(max(batteryLevels))
+
+    # Returns the overall min and max.
+    return min(mins), max(maxs)
+
 # ===========================================================================================================
 
-# file = open("rates.csv", 'w')
+file = open("rates.csv", 'w')
 
-# # Gets the battery usage rates in V/s and %/s.
-# ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
-# ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
+# Gets the minimum and maximum range of the battery voltage.
+# min, max = DetermineMinAndMaxFromFolder(LOG_FOLDER)
+# print(f"Min: {min}, Max: {max}")
 
-# # Filters out all of the leading drones, so we are left with only trailing drones.
-# ratesVoltage= FilterDronePositions(ratesVoltage, False)
-# ratesPercentage = FilterDronePositions(ratesPercentage, False)
+# Gets the battery usage rates in V/s and %/s.
+ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
+ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
 
-# # Writes it to the file.
-# file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
-# for key in ratesVoltage.keys():
-#     file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
+# Filters out all of the leading drones, so we are left with only trailing drones.
+ratesVoltage= FilterDronePositions(ratesVoltage, False)
+ratesPercentage = FilterDronePositions(ratesPercentage, False)
 
-# file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
+# Writes it to the file.
+file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
+for key in ratesVoltage.keys():
+    file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
 
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
+file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
+
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False, minVoltage=min, maxVoltage=max)
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage", minVoltage=min, maxVoltage=max)
