@@ -269,6 +269,35 @@ def PlotBatteryFromFolder(folderName: str, outputFolder: str, convertToPercentag
     for file in os.listdir(folderName):
         SaveBatteryPlotToFolder(folderName + "/" + file, outputFolder, convertToPercentage)
 
+def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
+    """Replaces a line in a file with the desired text.
+    
+    Used once to fix the header files of old trials that weren't originally used.
+    Not currently used in any code, left here for transparency and bookkeeping.
+    
+    Parameters:
+        fileName: str
+            The name of the file to use.
+        lineNumber: int
+            The line (indexed from 1) to replace.
+        text: str
+            The text to replace the line with, *without* a newline character at the end.
+    """
+
+    file = open(fileName, 'r')
+    lines = file.readlines()
+    file.close()
+
+    if (lineNumber > len(lines)):
+        print(f"Error, file {fileName} does not have line {lineNumber}")
+        exit()
+
+    lines[lineNumber - 1] = text + "\n"
+
+    file = open(fileName, 'w')
+    for line in lines:
+        file.write(line)
+
 # ===========================================================================================================
 
 file = open("rates.csv", 'w')

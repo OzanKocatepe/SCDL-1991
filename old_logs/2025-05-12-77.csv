@@ -4,7 +4,7 @@ date: 2025-05-12
 time: 20:38:49
 distance: 2.25
 velocity: 0.5
-horizontalSeparation: 0.75
+horizontalSeparation: 1.0
 heightAboveDefault: 0
 trial: 2
 ==========================================
