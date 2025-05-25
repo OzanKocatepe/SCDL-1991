@@ -300,21 +300,21 @@ def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
 
 # ===========================================================================================================
 
-file = open("rates.csv", 'w')
+# file = open("rates.csv", 'w')
 
-# Gets the battery usage rates in V/s and %/s.
-ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
-ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
+# # Gets the battery usage rates in V/s and %/s.
+# ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
+# ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
 
-# Filters out all of the leading drones, so we are left with only trailing drones.
-ratesVoltage= FilterDronePositions(ratesVoltage, False)
-ratesPercentage = FilterDronePositions(ratesPercentage, False)
+# # Filters out all of the leading drones, so we are left with only trailing drones.
+# ratesVoltage= FilterDronePositions(ratesVoltage, False)
+# ratesPercentage = FilterDronePositions(ratesPercentage, False)
 
-# Writes it to the file.
-file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
-for key in ratesVoltage.keys():
-    file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
+# # Writes it to the file.
+# file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
+# for key in ratesVoltage.keys():
+#     file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
 
-file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
+# file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-PlotBatteryFromFolder("350mAh_logs", OUTPUT_FOLDER)
+# PlotBatteryFromFolder("350mAh_logs", OUTPUT_FOLDER)
