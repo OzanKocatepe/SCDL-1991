@@ -320,4 +320,5 @@ def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
 
 # file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
