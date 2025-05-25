@@ -5,6 +5,7 @@ time: 19:52:47
 distance: 2.25
 velocity: 1.0
 horizontalSeparation: 1.0
+verticalSeparation: 0.25
 heightAboveDefault: 0
 trial: 0
 ==========================================
