@@ -116,12 +116,17 @@ def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
 
     heightAboveDefault = lines[8].split(":")
     heightAboveDefault = float(heightAboveDefault[1])
+
+    # Determines whether the drone was leading or trailing based on its extra vertical height.
     if (heightAboveDefault == 0.0):
         leading = False
     else:
         leading = True
+    
+    trialNum = lines[9].split(":")
+    trialNum = int(trialNum[1])
 
-    return velocity, horizontalSeparation, verticalSeparation, leading
+    return velocity, horizontalSeparation, verticalSeparation, leading, trialNum
 
 def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[tuple[float, float, float, bool], float]:
     """Extracts the battery usage for each trial from a folder.
@@ -150,7 +155,7 @@ def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False) -> dict[t
     numEntries = {}
 
     for file in os.listdir(folder):
-        vel, horiz, vert, leading = ExtractHeaderFromFile(folder + "/" + file)
+        vel, horiz, vert, leading, trialNum = ExtractHeaderFromFile(folder + "/" + file)
         key = (vel, horiz, vert, leading)
 
         rate = ExtractBatteryUsageRateFromFile(folder + "/" + file)
@@ -230,12 +235,10 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     trendlineBatteryLevels = CreateTrendline(timestamps, batteryLevels)
 
     # Gets the file label.
-    vel, hSep, vSep, isLead = ExtractHeaderFromFile(fileName)
+    vel, hSep, vSep, isLead, trialNum = ExtractHeaderFromFile(fileName)
 
     # Determines the next valid file name.
-    fileNameIndex = 0
-    while (os.path.exists(outputFileName := f"({vel}, {hSep}, {vSep}, {isLead})-{fileNameIndex}")):
-        fileNameIndex += 1
+    outputFileName = f"({vel}, {hSep}, {vSep}, {isLead})-{trialNum}"
 
     # Plots the curve.
     plt.plot(timestamps, batteryLevels, 'o')
@@ -243,7 +246,7 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     plt.plot(timestamps, trendlineBatteryLevels)
 
     # Writes the title and axis labels.
-    plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}")
+    plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}, trialNum={trialNum}")
     plt.xlabel("Time (s)")
     if convertToPercentage:
         plt.ylabel("Battery Charge (%)")
@@ -317,4 +320,4 @@ def ReplaceLineInFile(fileName: str, lineNumber: int, text: str) -> None:
 
 # file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-# PlotBatteryFromFolder("350mAh_logs", OUTPUT_FOLDER)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER)
