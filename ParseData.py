@@ -3,6 +3,7 @@ import csv
 from typing import Tuple
 import matplotlib.pyplot as plt
 from scipy import stats
+import statistics
 
 LOG_FOLDER = "./350mAh_logs"
 OUTPUT_FOLDER = "./plots"
@@ -164,17 +165,17 @@ def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False, minVoltag
             The voltage corresponding to a fully charged battery.
 
     Returns:
-        dict[list[float, float, float, bool], float]:
-            A dictionary where the keys are a list of floats of the form
-            [velocity, horizontalSeparation, verticalSeparation, leading]
-            and the values are the average battery usage for that
-            configuration in V/s or %/s.
+        dict[list[float, float, float, bool], (float, float)]:
+            A dictionary where
+                the keys are a list of floats of the form
+                [velocity, horizontalSeparation, verticalSeparation, leading] and
+                
+                the values are a tuple containing the mean battery usage for
+                that configuration in V/s or %/s, and the variance of that configuration.
     """
 
-    # Stores the averaged entries.
-    output = {}
-    # Stores the number of entries that have been averaged so far in each key.
-    numEntries = {}
+    # Stores the list of the battery rates in each configuration.
+    batteryRates = {}
 
     for file in os.listdir(folder):
         vel, horiz, vert, leading, trialNum = ExtractHeaderFromFile(folder + "/" + file)
@@ -185,20 +186,23 @@ def ExtractBatteryUsageFromFolder(folder: str, percentage: bool=False, minVoltag
         if (percentage):
             rate = rate * 100 / (maxVoltage - minVoltage)
 
-        # If we've already seen this entry before.
-        if key in output.keys():
-            # Get the number of entries making up the current running average.
-            count = numEntries[key]
-            # Multiply by count, add the new rate, and then take the new average.
-            output[key] = ((output.get(key) * count) + rate) / (count + 1.0)
-            # Update the number of entries in the running average.
-            numEntries[key] += 1
+        # If we've already seen this entry before, append it to the
+        # corresponding list.
+        if key in batteryRates.keys():
+            batteryRates[key].append(rate)
         else:
-            # Otherwise, just put the value into the dictionary.
-            output[key] = rate
-            numEntries[key] = 1
+            # Otherwise, create a list with the rate in it.
+            batteryRates[key] = [rate,]
 
-    return output
+    # Turns each list in the dictionary into a tuple
+    # containing the (mean, std. dev.) of the original list.
+    for key in batteryRates.keys():
+        currentList = batteryRates[key]
+        mean = statistics.mean(currentList)
+        stddev = statistics.stdev(currentList)
+        batteryRates[key] = (mean, stddev)
+
+    return batteryRates
 
 def FilterDronePositions(rates: dict[tuple[float, float, float, bool], float], filterLeading: bool) -> dict[tuple[float, float, float, bool], float]:
     """Filters out all of the leading or trailing drone data.
@@ -365,13 +369,13 @@ ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
 ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
 
 # Filters out all of the leading drones, so we are left with only trailing drones.
-ratesVoltage= FilterDronePositions(ratesVoltage, False)
+ratesVoltage = FilterDronePositions(ratesVoltage, False)
 ratesPercentage = FilterDronePositions(ratesPercentage, False)
 
 # Writes it to the file.
-file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), rate (%/s)\n")
+file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), stddev (V/s) rate (%/s), stddev (%/s)\n")
 for key in ratesVoltage.keys():
-    file.write(f"{key}, {ratesVoltage[key]}, {ratesPercentage[key]}\n")
+    file.write(f"{key}, {ratesVoltage[key][0]}, {ratesVoltage[key][1]}, {ratesPercentage[key][0]}, {ratesPercentage[key][1]}\n")
 
 file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
