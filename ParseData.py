@@ -373,7 +373,7 @@ ratesVoltage = FilterDronePositions(ratesVoltage, False)
 ratesPercentage = FilterDronePositions(ratesPercentage, False)
 
 # Writes it to the file.
-file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), stddev (V/s) rate (%/s), stddev (%/s)\n")
+file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), stddev (V/s), rate (%/s), stddev (%/s)\n")
 for key in ratesVoltage.keys():
     file.write(f"{key}, {ratesVoltage[key][0]}, {ratesVoltage[key][1]}, {ratesPercentage[key][0]}, {ratesPercentage[key][1]}\n")
 
