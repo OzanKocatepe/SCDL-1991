@@ -7,7 +7,7 @@ from scipy import stats
 LOG_FOLDER = "./350mAh_logs"
 OUTPUT_FOLDER = "./plots"
 
-MIN_VOLTAGE = 3.2
+MIN_VOLTAGE = 3.0
 MAX_VOLTAGE = 4.2
 
 def ExtractBatteryUsageRateFromFile(fileName: str) -> float:
@@ -85,6 +85,24 @@ def CreateTrendline(x: list[float], y: list[float]) -> list[float]:
     slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
 
     return [slope * t + intercept for t in x]
+
+def GetRSquared(x: list[float], y: list[float]) -> float:
+    """Gets the R^2 value of a linear regression.
+    
+    Parameters
+        x: list[float]
+            The x-coordinates of the data.
+        y: list[float]
+            The y-coordinates of the data.
+
+    Returns:
+        float:
+            The R^2 value of the linear regression.
+    """
+
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+
+    return r_value**2
 
 def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
     """Extracts the relevant information from the header of a .csv file.
@@ -342,10 +360,6 @@ def DetermineMinAndMaxFromFolder(folderName: str) -> tuple[float, float]:
 
 file = open("rates.csv", 'w')
 
-# Gets the minimum and maximum range of the battery voltage.
-# min, max = DetermineMinAndMaxFromFolder(LOG_FOLDER)
-# print(f"Min: {min}, Max: {max}")
-
 # Gets the battery usage rates in V/s and %/s.
 ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
 ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
@@ -361,5 +375,5 @@ for key in ratesVoltage.keys():
 
 file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False, minVoltage=min, maxVoltage=max)
-# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage", minVoltage=min, maxVoltage=max)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
