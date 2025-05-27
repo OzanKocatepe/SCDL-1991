@@ -271,12 +271,12 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     outputFileName = f"({vel}, {hSep}, {vSep}, {isLead})-{trialNum}"
 
     # Plots the curve.
-    plt.plot(timestamps, batteryLevels, 'o')
+    plt.plot(timestamps, batteryLevels, 'o', color="black", markersize=3)
     # Plots the trendline.
-    plt.plot(timestamps, trendlineBatteryLevels)
+    plt.plot(timestamps, trendlineBatteryLevels, color="red")
 
     # Writes the title and axis labels.
-    plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}, trialNum={trialNum}")
+    # plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}, trialNum={trialNum}")
     plt.xlabel("Time (s)")
     if convertToPercentage:
         plt.ylabel("Battery Charge (%)")
@@ -362,22 +362,22 @@ def DetermineMinAndMaxFromFolder(folderName: str) -> tuple[float, float]:
 
 # ===========================================================================================================
 
-file = open("rates.csv", 'w')
+# file = open("rates.csv", 'w')
 
-# Gets the battery usage rates in V/s and %/s.
-ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
-ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
+# # Gets the battery usage rates in V/s and %/s.
+# ratesVoltage = ExtractBatteryUsageFromFolder(LOG_FOLDER)
+# ratesPercentage = ExtractBatteryUsageFromFolder(LOG_FOLDER, True)
 
-# Filters out all of the leading drones, so we are left with only trailing drones.
-ratesVoltage = FilterDronePositions(ratesVoltage, False)
-ratesPercentage = FilterDronePositions(ratesPercentage, False)
+# # Filters out all of the leading drones, so we are left with only trailing drones.
+# ratesVoltage = FilterDronePositions(ratesVoltage, False)
+# ratesPercentage = FilterDronePositions(ratesPercentage, False)
 
-# Writes it to the file.
-file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), stddev (V/s), rate (%/s), stddev (%/s)\n")
-for key in ratesVoltage.keys():
-    file.write(f"{key}, {ratesVoltage[key][0]}, {ratesVoltage[key][1]}, {ratesPercentage[key][0]}, {ratesPercentage[key][1]}\n")
+# # Writes it to the file.
+# file.write("(velocity (m/s), horizontal (m), vertical (m), leading), rate (V/s), stddev (V/s), rate (%/s), stddev (%/s)\n")
+# for key in ratesVoltage.keys():
+#     file.write(f"{key}, {ratesVoltage[key][0]}, {ratesVoltage[key][1]}, {ratesPercentage[key][0]}, {ratesPercentage[key][1]}\n")
 
-file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
+# file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
 PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
 PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
