@@ -47,6 +47,28 @@ def ExtractBatteryUsageDataFromFile(fileName: str) -> Tuple[list[float], list[fl
                 timestamps.
     """
 
+    timestamps = ExtractColumnFromLog(fileName, "timestamp")
+    batteryLevels = ExtractColumnFromLog(fileName, "batteryV")
+
+    # Shifts the timestamps to start at 0.
+    timestamps = [(time - timestamps[0]) / 1000.0 for time in timestamps]
+
+    return timestamps, batteryLevels
+
+def ExtractColumnFromLog(fileName: str, columnLabel: str) -> list[float]:
+    """Extracts the desired column from a log file.
+    
+    Parameters:
+        fileName: str
+            The file to parse through.
+        columnLabel: str
+            The label of the column to extract.
+
+    Returns:
+        list[float]:
+            All of the data in that column.
+    """
+
     # Opens the file in a csv dictionary.
     file = open(fileName, "r")
     csvFile = csv.DictReader(file)
@@ -56,16 +78,11 @@ def ExtractBatteryUsageDataFromFile(fileName: str) -> Tuple[list[float], list[fl
         csvFile.__next__()
 
     # Gets the timestamp and battery level data.
-    timestamps = []
-    batteryLevels = []
+    data = []
     for line in csvFile:
-       timestamps.append(int(line["timestamp"]))
-       batteryLevels.append(float(line["batteryV"]))
+       data.append(float(line[columnLabel]))
 
-    # Shifts the timestamps to start at 0.
-    timestamps = [(time - timestamps[0]) / 1000.0 for time in timestamps]
-
-    return timestamps, batteryLevels
+    return data
 
 def CreateTrendline(x: list[float], y: list[float]) -> list[float]:
     """Creates a trendline given a set of input data.
@@ -105,7 +122,29 @@ def GetRSquared(x: list[float], y: list[float]) -> float:
 
     return r_value**2
 
-def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
+def GetAllRSquaredValues(logFolder: str) -> list[float]:
+    """Gets all of the R^2 values from a folder of logs.
+    
+    Parameters:
+        logFolder: str
+            The folder containing the logs.
+    
+    Returns:
+        list[float]:
+            A list of all the R^2 values after performing
+            a linear regression on every log individually.
+    """
+    output = []
+
+    for file in os.listdir(logFolder):
+        fileName = f"{logFolder}/{file}"
+        timestamps, batteryLevels = ExtractBatteryUsageDataFromFile(fileName)
+        rSquared = GetRSquared(timestamps, batteryLevels)
+        output.append(rSquared)
+
+    return output
+
+def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool, int]:
     """Extracts the relevant information from the header of a .csv file.
     
     Parameters:
@@ -113,10 +152,10 @@ def ExtractHeaderFromFile(fileName: str) -> Tuple[float, float, float, bool]:
             The file to parse.
     
     Returns:
-        Tuple[float, float, float, bool]:
+        Tuple[float, float, float, bool, int]:
             A tuple containing the velocity, horizontalSeparation, and
-            verticalSeparation, and a boolean stating whether
-            the drone was the leading drone.
+            verticalSeparation, a boolean stating whether
+            the drone was the leading drone, and the trial number.
     """
 
     file = open(fileName, "r")
@@ -273,7 +312,8 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
     # Plots the curve.
     plt.plot(timestamps, batteryLevels, 'o', color="black", markersize=3)
     # Plots the trendline.
-    plt.plot(timestamps, trendlineBatteryLevels, color="red")
+    rSquared = GetRSquared(timestamps, batteryLevels)
+    plt.plot(timestamps, trendlineBatteryLevels, color="red", label="R^2 = %0.2f" % rSquared)
 
     # Writes the title and axis labels.
     # plt.title(f"Vel={vel}, hSep={hSep}, vSep={vSep}, isLead={isLead}, trialNum={trialNum}")
@@ -282,6 +322,9 @@ def SaveBatteryPlotToFolder(fileName: str, outputFolder: str, convertToPercentag
         plt.ylabel("Battery Charge (%)")
     else:
         plt.ylabel("Battery Charge (V)")
+
+    # Places the R^2 value on the bottom right.
+    plt.legend(loc="lower right")
 
     # Saves the figure to the output folder.
     plt.savefig(outputFolder + "/" + outputFileName + ".png")
@@ -408,7 +451,54 @@ def PlotBatteryConsumptionTable(convertToPercentage: bool, logFolder: str=LOG_FO
     # Saves the figure.
     plt.savefig(f"{outputFolder}/ConsumptionTable.png")
 
+def CalculatePositionVariance(logFolder: str) -> list[float]:
+    """Calculates the variance in the position parameters from what they were meant to be.
+    
+    Parameters:
+        logFolder: str
+            The folder that contains all of the logs to use.
+            
+    Returns:
+        list[float]:
+            The overall variance in the y- and z-position.
+    """
+
+    yResiduals = []
+    zResiduals = []
+
+    for file in os.listdir(logFolder):
+        vel, hSep, vSep, lead, trialNum = ExtractHeaderFromFile(f"{logFolder}/{file}")
+        
+        # Determines the desired coordinates y and z positions during the trial.
+        desiredY = 0
+        if lead:
+            desiredZ = 0.5 + vSep
+        else:
+            desiredZ = 0.5
+
+        # Extracts the columns.
+        y = ExtractColumnFromLog(f"{logFolder}/{file}", "y")
+        z = ExtractColumnFromLog(f"{logFolder}/{file}", "z")
+
+        # Appends the list of square errors to the residuals list.
+        yResiduals += [(realY - desiredY)**2 for realY in y]
+        zResiduals += [(realZ - desiredZ)**2 for realZ in z]
+
+    # Calculates the sample variances.
+    yVariance = sum(yResiduals) / (len(yResiduals) - 1)
+    zVariance = sum(zResiduals) / (len(zResiduals) - 1)
+    
+    return [yVariance, zVariance]
+        
+
 # ===========================================================================================================
+
+posVar = CalculatePositionVariance(LOG_FOLDER)
+print(f"Y Variance: {posVar[0]}, Z Variance: {posVar[1]}")
+rSquareds = GetAllRSquaredValues(LOG_FOLDER)
+mean = statistics.mean(rSquareds)
+var = statistics.variance(rSquareds)
+print(f"Mean R^2: {mean}, Variance of R^2: {var}")
 
 # file = open("rates.csv", 'w')
 
@@ -427,7 +517,7 @@ def PlotBatteryConsumptionTable(convertToPercentage: bool, logFolder: str=LOG_FO
 
 # file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
-# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
+PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
 
-PlotBatteryConsumptionTable(True, LOG_FOLDER)
+# PlotBatteryConsumptionTable(True, LOG_FOLDER)
