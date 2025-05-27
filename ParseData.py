@@ -360,6 +360,54 @@ def DetermineMinAndMaxFromFolder(folderName: str) -> tuple[float, float]:
     # Returns the overall min and max.
     return min(mins), max(maxs)
 
+def PlotBatteryConsumptionTable(convertToPercentage: bool, logFolder: str=LOG_FOLDER, outputFolder: str=OUTPUT_FOLDER,ncludeBarChart: bool=False) -> None:
+    """Plots the battery consumption values as a table from a folder.
+    
+    Parameters:
+        convertToPercentage: bool
+            Whether to use percentages or volts.
+        logFolder: str
+            The folder containing the logs to use.
+        outputFolder: str
+            The folder to output the table to.
+        includeBarChart: bool
+            Whether to include an accompanying bar chart.
+    """
+
+    # Gets the battery usage rates in V/s or %/s.
+    rates = ExtractBatteryUsageFromFolder(LOG_FOLDER, convertToPercentage)
+
+    # Filters out all of the leading drones, so we are left with only trailing drones.
+    rates = FilterDronePositions(rates, False)
+
+    # Lists all possible separations and velocities.
+    possibleVelocities = (0.5, 0.75, 1.0)
+    possibleVerticalSeparations = (0.25, 0.5, 0.75)
+
+    # Defines the data.
+    # Reminder: keys for rates dictionary are of the form (vel, hsep, vsep, lead).
+    data = [[rates[(vel, 1.0, 0.25, False)] for vel in possibleVelocities],
+            [rates[(vel, 1.0, 0.5, False)] for vel in possibleVelocities],
+            [rates[(vel, 1.0, 0.75, False)] for vel in possibleVelocities]]
+    
+    data = [[f"{0:1.1f}".format(entry) for entry in row] for row in data]
+
+    # Defines the row and column headers.
+    columns = [str(vel) for vel in possibleVelocities]
+    rows = [str(sep) for sep in possibleVerticalSeparations]
+
+    # Creates the table.
+    table = plt.table(cellText=data, rowLabels=rows, colLabels=columns, colColours=None, loc='center')
+
+    # Removes the bar chart.
+    ax = plt.gca()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    plt.box(on=None)
+
+    # Saves the figure.
+    plt.savefig(f"{outputFolder}/ConsumptionTable.png")
+
 # ===========================================================================================================
 
 # file = open("rates.csv", 'w')
@@ -379,5 +427,7 @@ def DetermineMinAndMaxFromFolder(folderName: str) -> tuple[float, float]:
 
 # file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
+
+PlotBatteryConsumptionTable(True, LOG_FOLDER)
