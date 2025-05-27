@@ -498,7 +498,7 @@ print(f"Y Variance: {posVar[0]}, Z Variance: {posVar[1]}")
 rSquareds = GetAllRSquaredValues(LOG_FOLDER)
 mean = statistics.mean(rSquareds)
 var = statistics.variance(rSquareds)
-print(f"Mean R^2: {mean}, Variance of R^2: {var}")
+print(f"Mean R^2: {mean}, Variance of R^2: {var}, Max: {max(rSquareds)}, Min: {min(rSquareds)}")
 
 # file = open("rates.csv", 'w')
 
@@ -517,7 +517,7 @@ print(f"Mean R^2: {mean}, Variance of R^2: {var}")
 
 # file.write(f"\nTotal number of unique datasets: {len(ratesVoltage.keys())}")
 
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
-PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/volts", False)
+# PlotBatteryFromFolder(LOG_FOLDER, OUTPUT_FOLDER + "/percentage")
 
 # PlotBatteryConsumptionTable(True, LOG_FOLDER)
